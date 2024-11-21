@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Somnia AI</title>
+    <style>
+        /* Подключение шрифтов */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* Общие стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1b1b38;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Шапка (Header) */
+        header {
+            background: rgba(7, 14, 39, 0.9);
+            padding: 20px 0; /* Увеличены верхний и нижний отступы */
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid #2c2c54;
+        }
+
+        .header-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header .logo {
+            text-align: left;
+        }
+
+        .nav-links-container {
+            display: flex;
+            justify-content: flex-end;
+            flex: 1;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #f8f8f8;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #A062FF;
+        }
+
+        /* Главный экран (Hero Section) */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('night-landscape2.png') no-repeat center center/cover;
+            text-align: center;
+            padding: 250px 20px; /* Увеличен верхний и нижний отступ */
+            color: #fff;
+            margin: 10px 0; /* Широкие отступы сверху и снизу для разделения секций */
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero h2 {
+            font-size: 48px;
+            margin-bottom: 20px; /* Увеличен нижний отступ */
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 40px; /* Увеличен нижний отступ */
+            -webkit-text-stroke: 0.5px #000000; /* Добавлена обводка черным цветом */
+        }
+
+        .hero .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 500;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* Остальные стили для кнопок */
+        .btn-primary {
+            background: linear-gradient(90deg, #7443FF, #A062FF);
+            color: #fff;
+            box-shadow: 0 8px 15px rgba(116, 67, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #5a34cc, #8249e0);
+            box-shadow: 0 8px 25px rgba(116, 67, 255, 0.8);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #1b1b38;
+        }
+
+        .btn-secondary:hover {
+            background: #e6e6e6;
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1e1e3f, #2c2c54);
+            padding: 70px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .content-wrapper {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .qr-code-section {
+            flex: 1;
+            text-align: center;
+        }
+
+        .qr-code img {
+            width: 200px;
+            height: auto;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .qr-code img:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .qr-code p {
+            font-size: 16px;
+            color: #e6e6e6;
+        }
+
+        .description {
+            flex: 2;
+            text-align: center;
+        }
+
+        .description h3 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .description p {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #e6e6e6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        .screenshot {
+            flex: 1;
+            text-align: center;
+        }
+
+        .screenshot img {
+            width: 300px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .screenshot img:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-block;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #7443FF, #A062FF);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(116, 67, 255, 0.6);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #5a34cc, #8249e0);
+            box-shadow: 0 10px 30px rgba(116, 67, 255, 0.9);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid #ffffff;
+        }
+
+        .btn-secondary:hover {
+            background: #ffffff;
+            color: #2c2c54;
+        }
+
+        @media (max-width: 768px) {
+            .qr-code-section,
+            .screenshot {
+                flex: unset;
+                margin-bottom: 30px;
+            }
+
+            .description {
+                flex: unset;
+            }
+        }
+
+        /* Функции */
+        .features {
+            padding: 20px; /* Отступы внутри блока */
+            margin: 60px;  /* Отступы снаружи блока для разделения между собой */
+            background: #1b1b38;
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .features h3 {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .feature-list {
+            padding: 20px; /* Отступы внутри блока */
+            margin: 20px;  /* Отступы снаружи блока для разделения между собой */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            width: 250px;
+            height: auto;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature h4 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Отзывы */
+        .testimonials {
+            background: #2c2c54;
+            padding: 50px 20px;
+            text-align: center;
+            border-radius: 15px;
+        }
+
+        .testimonials h3 {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .testimonial {
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .testimonial p:last-child {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        /* Призыв к действию */
+        .cta {
+            background: linear-gradient(90deg, #7443FF, #A062FF);
+            text-align: center;
+            padding: 50px 20px;
+            color: #fff;
+            border-radius: 15px;
+        }
+
+        .cta h3 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .cta p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* Футер */
+        footer {
+            background: #1b1b38;
+            padding: 20px 0;
+            text-align: center;
+            border-top: 1px solid #2c2c54;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .social-links {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .social-links img {
+            width: 24px;
+            height: 24px;
+            transition: opacity 0.3s;
+        }
+
+        .social-links img:hover {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <h1>Somnia AI</h1>
+            </div>
+            <nav class="nav-links-container">
+                <ul class="nav-links">
+                    <li><a href="#blog">Блог</a></li>
+                    <li><a href="#about">О нас</a></li>
+                    <li><a href="#contact">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Анализируйте свои сны с помощью Somnia AI</h2>
+            <p>Раскройте тайны своего подсознания с помощью анализа снов на базе искусственного интеллекта.</p>
+            <div class="hero-buttons">
+            <a href="https://t.me/SomniaAI_bot" class="btn btn-primary" target="_blank">Начать анализ сна</a>
+                <a href="#how-it-works" class="btn btn-secondary">Узнать больше</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <div class="content-wrapper">
+                <!-- QR Code -->
+                <div class="qr-code-section">
+                    <div class="qr-code">
+                        <img src="qr-code-placeholder.png" alt="QR Code for Somnia AI">
+                        <p>Наведите телефон на QR-код, чтобы получить доступ к нашему Telegram боту и начать анализ снов прямо сейчас.</p>
+                    </div>
+                </div>
+
+                <!-- Text and Buttons -->
+                <div class="description">
+                    <h3>Откройте мир анализа снов</h3>
+                    <p>Используйте наш Telegram бот для анализа ваших снов с помощью ИИ. Добавьте свой сон, и Somnia AI предоставит глубокий анализ и полезные инсайты.</p>
+                    <div class="buttons">
+                        <a href="https://t.me/SomniaAI_bot" class="btn btn-primary">Начать анализ сна</a>
+                        <a href="https://t.me/somnia_ai" class="btn btn-secondary" target="_blank">Подписаться на канал</a>
+                    </div>
+                </div>
+
+                <!-- Screenshot -->
+                <div class="screenshot">
+                    <img src="screenshot-placeholder.png" alt="Bot Screen Example">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h3>Особенности</h3>
+            <div class="feature-list">
+                <div class="feature">
+                    <h4>Анализ</h4>
+                    <p>Наш бот-анализатор снов использует искусственный интеллект для быстрой и точной интерпретации ваших снов.</p>
+                </div>
+                <div class="feature">
+                    <h4>Журнал</h4>
+                    <p>Сохраняйте свои сны и их толкования в одном месте для легкого доступа и размышлений.</p>
+                </div>
+                <div class="feature">
+                    <h4>Статистика</h4>
+                    <p>Отслеживайте повторяющиеся символы сна и темы сновидений для лучшего понимания.</p>
+                </div>
+                <div class="feature">
+                    <h4>Канал в Telegram</h4>
+                    <p>Получите доступ к ресурсам для анализа снов и осознанного сновидения.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <h3>Отзывы</h3>
+            <div class="testimonial">
+                <p>"Somnia AI помог мне понять свои сны и их значение. Очень рекомендую!"</p>
+                <p>- Пользователь</p>
+            </div>
+            <div class="testimonial">
+                <p>"Я нашел ответы на внутренние вопросы, благодаря анализу снов."</p>
+                <p>- Довольный клиент</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta">
+        <div class="container">
+            <h3>Готовы исследовать свои сны?</h3>
+            <p>Подключайтесь к Somnia AI и начните свой путь к осознанным снам.</p>
+            <a href="https://t.me/SomniaAI_bot" class="btn btn-primary">Начать сейчас</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Somnia AI. Все права защищены.</p>
+            <ul class="social-links">
+                <li><a href="#"><img src="icon-facebook.png" alt="Facebook"></a></li>
+                <li><a href="#"><img src="icon-twitter.png" alt="Twitter"></a></li>
+                <li><a href="#"><img src="icon-instagram.png" alt="Instagram"></a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,47 @@
+document.getElementById('interpretBtn').addEventListener('click', interpretDream);
+
+async function interpretDream() {
+    const dreamText = document.getElementById('dreamText').value;
+    const resultSection = document.getElementById('result');
+    const interpretationText = document.getElementById('interpretationText');
+    const interpretationDetails = document.getElementById('interpretationDetails');
+
+    if (dreamText.trim() === '') {
+        alert('Please enter a dream to interpret.');
+        return;
+    }
+
+    // Отправляем запрос к API интерпретации сна на Heroku
+    try {
+        const response = await fetch('https://jung-dream-3fa360de57f2.herokuapp.com/web_interpret_dream', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ dream_text: dreamText })
+        });
+
+        console.log('Response:', response); // Логируем ответ для отладки
+
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Data:', data); // Логируем данные для проверки структуры
+
+        // Отображаем интерпретацию на сайте
+        if (data.interpretation) {
+            interpretationText.innerText = "Интерпретация:";
+            interpretationDetails.innerText = data.interpretation;
+
+            resultSection.classList.remove('hidden');
+        } else {
+            throw new Error('Не удалось найти поле интерпретации в ответе сервера.');
+        }
+
+    } catch (error) {
+        console.error('Ошибка при получении интерпретации:', error);
+        alert('Не удалось получить интерпретацию сна. Пожалуйста, попробуйте позже.');
+    }
+}
