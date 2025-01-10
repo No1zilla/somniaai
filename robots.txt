@@ -1,2 +1,4 @@
 User-agent: *
 Disallow:
+
+Sitemap:https://somnia-ai.com/sitemap.xml
