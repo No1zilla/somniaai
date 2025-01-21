@@ -418,25 +418,31 @@
             opacity: 0.7;
         }
     </style>
-     <!-- JSON-LD -->
+
+    <!-- JSON-LD для структурированных данных -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "url": "https://somnia-ai.com/",
-  "name": "Somnia AI",
-  "description": "Somnia AI Сонник Нейросеть Толкование снов ИИ",
-  "author": {
-    "@type": "Organization",
-    "name": "Somnia AI"
-  },
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://somnia-ai.com/search?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-</script>
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://somnia-ai.com/",
+      "name": "Somnia AI",
+      "description": "Somnia AI Сонник Нейросеть Толкование снов ИИ",
+      "author": {
+        "@type": "Organization",
+        "name": "Somnia AI"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://somnia-ai.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Код для подгрузки и работы Яндекс.РТБ -->
+    <script>window.yaContextCb=window.yaContextCb||[]</script>
+    <script src="https://yandex.ru/ads/system/context.js" async></script>
+
 </head>
 
 <body>
@@ -463,6 +469,16 @@
         </div>
     </header>
 
+    <!-- Yandex.RTB R-A-13772840-1 -->
+    <div id="yandex_rtb_R-A-13772840-1"></div>
+    <script>
+    window.yaContextCb.push(() => {
+        Ya.Context.AdvManager.render({
+            "blockId": "R-A-13772840-1",
+            "renderTo": "yandex_rtb_R-A-13772840-1"
+        })
+    })
+    </script>
 
     <!-- Hero Section -->
     <section class="hero">
