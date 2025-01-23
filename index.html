@@ -481,6 +481,26 @@
         font-size: 16px;
         color: #ffffff;
     }
+
+/* Медиа-запросы для десктопов */
+@media (min-width: 1024px) {
+    #dreamInput, #submitBtn {
+        width: 50%;  /* Ограничиваем ширину до 50% на десктопах */
+        margin: 20px auto; /* Центрируем и добавляем вертикальные отступы */
+    }
+
+    .dream-input-section, .response, .container {
+        width: 70%; /* Устанавливаем ширину 70% для контейнера и секций ввода и ответа */
+        margin: 0 auto; /* Центрирование блоков */
+    }
+
+    .dream-input-section, .response {
+        padding: 20px; /* Добавляем отступы для лучшей визуализации */
+        display: flex; /* Использование flexbox для лучшего распределения пространства */
+        flex-direction: column; /* Элементы расположены вертикально */
+        align-items: center; /* Центрирование содержимого по горизонтали */
+    }
+}
     </style>
 
     <!-- JSON-LD для структурированных данных -->
