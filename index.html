@@ -417,6 +417,70 @@
         .social-links img:hover {
             opacity: 0.7;
         }
+            .dream-input-section {
+        background: rgba(27, 27, 56, 0.9);
+        padding: 20px;
+        margin-top: 20px;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .dream-input-section h3 {
+        color: #ffffff;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    #dreamInput {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    #submitBtn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #7443FF, #A062FF);
+        color: #fff;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    #submitBtn:hover {
+        background: linear-gradient(90deg, #5a34cc, #8249e0);
+        box-shadow: 0 5px 15px rgba(116, 67, 255, 0.8);
+    }
+
+    .error {
+        color: red;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .response {
+        color: #ffffff;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+
+    .response h3 {
+        text-align: center;
+        color: #A062FF;
+    }
+
+    .response p {
+        font-size: 16px;
+        color: #ffffff;
+    }
     </style>
 
     <!-- JSON-LD для структурированных данных -->
@@ -485,12 +549,79 @@
         <div class="hero-content">
             <h2>Анализируйте свои сны с помощью нейросети Somnia AI</h2>
             <p>Раскройте тайны своего подсознания с помощью толкования снов на базе искусственного интеллекта.</p>
-            <div class="hero-buttons">
-            <a href="https://t.me/SomniaAI_bot?start=site1" class="btn btn-primary" target="_blank">Начать анализ сна</a>
-                <a href="#how-it-works" class="btn btn-secondary">Узнать больше</a>
-            </div>
+
+                <!-- Форма ввода сна -->
+                <div id="dreamForm">
+                    <textarea id="dreamInput" placeholder="Введите ваш сон для анализа..."></textarea>
+                    <button id="submitBtn">Отправить сон</button>
+                </div>
+
+                <!-- Контейнер для отображения интерпретации -->
+                <div id="responseContainer" style="display: none;"></div>
+                    <div class="hero-buttons">
+                    <a href="https://t.me/SomniaAI_bot?start=site1" class="btn btn-primary" target="_blank">Продолжить анализ в телеграмм</a>
+                        <a href="#how-it-works" class="btn btn-secondary">Узнать больше</a>
+                    </div>
         </div>
     </section>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dreamInputSection = document.getElementById('dreamInputSection');
+        const responseContainer = document.getElementById('responseContainer');
+        const dreamForm = document.getElementById('dreamForm'); // Предполагается, что у формы есть этот ID
+
+        // Показываем сохраненную интерпретацию сна, если она есть
+        const savedInterpretation = localStorage.getItem('dreamInterpretation');
+        if (savedInterpretation) {
+            responseContainer.innerHTML = savedInterpretation;
+            dreamForm.style.display = 'none'; // Скрываем форму
+            responseContainer.style.display = 'block'; // Показываем интерпретацию
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const dreamText = document.getElementById('dreamInput').value;
+
+            // Очистка предыдущего ответа
+            responseContainer.innerHTML = '';
+
+            if (!dreamText.trim()) {
+                responseContainer.innerHTML = '<p class="error">Пожалуйста, введите текст сна.</p>';
+                return;
+            }
+
+            // Отправляем запрос к API интерпретации сна
+            try {
+                const response = await fetch('https://jung-dream-3fa360de57f2.herokuapp.com/web_interpret_dream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ dream_text: dreamText })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const interpretationHTML = `
+                        <div class="response">
+                            <h3>Интерпретация:</h3>
+                            <p>${data.interpretation}</p>
+                        </div>
+                    `;
+                    responseContainer.innerHTML = interpretationHTML;
+                    localStorage.setItem('dreamInterpretation', interpretationHTML); // Сохраняем интерпретацию
+                    dreamForm.style.display = 'none'; // Скрываем форму
+                    responseContainer.style.display = 'block'; // Показываем интерпретацию
+                } else {
+                    const errorData = await response.json();
+                    responseContainer.innerHTML = `<p class="error">Ошибка: ${errorData.error}</p>`;
+                }
+            } catch (error) {
+                responseContainer.innerHTML = `<p class="error">Произошла ошибка при подключении к серверу: ${error.message}</p>`;
+            }
+        });
+    });
+    </script>
 
     <!-- How It Works Section -->
     <section id="how-it-works" class="how-it-works">
