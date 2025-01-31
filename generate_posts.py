@@ -20,7 +20,8 @@ BLOG_FOLDER = "blog"
 BLOG_INDEX = "blog.html"
 
 # 🔹 Подключаем API
-openai.api_key = OPENAI_API_KEY
+# 🔹 Создаем экземпляр клиента OpenAI
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 vk_session = vk_api.VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
