@@ -20,7 +20,7 @@ BLOG_FOLDER = "blog"
 BLOG_INDEX = "blog.html"
 
 # 🔹 Подключаем API
-openai.api_key = OPENAI_API_KEY
+openai.api_key = OPENAI_API_KEY  # ✅ Устанавливаем API-ключ
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 vk_session = vk_api.VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
@@ -62,14 +62,15 @@ def generate_seo_keywords(topic):
         Отдай список ключевых слов через запятую, без лишнего текста.
         """
 
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(  # ✅ Правильный вызов OpenAI API
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=100,
             temperature=0.5
         )
 
-        return response.choices[0].message.content.split(", ") if response.choices else []
+        if response and "choices" in response and response["choices"]:
+            return response["choices"][0]["message"]["content"].split(", ")
     except Exception as e:
         print(f"❌ Ошибка OpenAI (SEO-ключи): {e}")
         return []
@@ -95,14 +96,15 @@ def generate_post(topic, platform, length, style):
         Избегайте повторений. В конце добавьте 1-2 вопроса для обсуждения, используйте умеренное количество эмодзи.
         """
 
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(  # ✅ Исправленный вызов OpenAI API
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=800 if length == "long" else 500,
             temperature=0.7
         )
-        post_text = response.choices[0].message.content if response.choices else None
+        post_text = response["choices"][0]["message"]["content"] if response["choices"] else None
         return post_text, all_keywords  # Обновленный return, возвращающий текст и ключевые слова
+
     except Exception as e:
         print(f"❌ Ошибка OpenAI ({platform}): {e}")
         return None
