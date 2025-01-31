@@ -148,17 +148,17 @@ def save_blog_post(title, content, all_keywords):
     keywords_str = ", ".join(all_keywords)  # Преобразуем список ключевых слов в строку
 
 
-    html_template = rf"""
+    html_template = f"""
     <html>
     <head>
-    <title>{title} | Somnia AI</title>
-    <meta name="description" content="{title}">
-    <meta name="keywords" content="{keywords_str}">
+        <title>{title} | Somnia AI</title>
+        <meta name="description" content="{title}">
+        <meta name="keywords" content="{keywords_str}">
     </head>
     <body>
-    <p>{content.replace('\n', '<br>')}</p>
-    <hr>
-    <a href="../blog.html">🔙 Вернуться к блогу</a>
+        <p>{content.replace('\n', '<br>')}</p>
+        <hr>
+        <a href="../blog.html">🔙 Вернуться к блогу</a>
     </body>
     </html>
     """
