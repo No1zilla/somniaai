@@ -30,3 +30,12 @@ jobs:
           VK_TOKEN: ${{ secrets.VK_TOKEN }}
         run: |
           python generate_posts.py
+
+      # 🔹 Добавление новых статей и обновленного индекса в Git
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add blog/*.html blog.html
+          git commit -m "📝 Автоматически добавлены новые статьи в блог"
+          git push          
