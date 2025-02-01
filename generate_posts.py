@@ -11,7 +11,7 @@ import re
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 VK_TOKEN = os.getenv("VK_TOKEN")
-CHANNEL_ID = "@poststestschannel"  # Telegram-канал
+CHANNEL_ID = "@somnia_ai"  # Telegram-канал
 VK_GROUP_ID = "-229159722"  # ID группы VK (со знаком "-")
 
 # 🔹 Пути к файлам
