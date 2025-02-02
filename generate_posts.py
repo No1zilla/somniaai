@@ -159,7 +159,7 @@ def save_blog_post(title, content, all_keywords):
     <body>
         <p>{content.replace('\n', '<br>')}</p>
         <hr>
-        <a href="../blog.html">🔙 Вернуться к блогу</a>
+        <a href="blog.html">🔙 Вернуться к блогу</a>
     </body>
     </html>
     """
