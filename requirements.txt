@@ -2,3 +2,4 @@ openai>=1.60.2
 telebot
 pandas
 vk-api
+transliterate==1.10.2

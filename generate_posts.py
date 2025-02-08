@@ -5,6 +5,7 @@ from datetime import datetime
 import openai
 import telebot
 import vk_api
+from transliterate import translit
 import re
 
 # 🔹 API-ключи
@@ -141,12 +142,22 @@ def markdown_to_html(text):
     
     return text
 
-# 🔹 📌 Сохранение статьи в блог
+# 🔹 📌 Функция для генерации slug (латинизированный URL)
+def generate_slug(title):
+    slug = translit(title, 'ru', reversed=True)  # Транслитерация с русского на латиницу
+    slug = re.sub(r'[^a-zA-Z0-9-]', '-', slug.lower())  # Заменяем пробелы и символы на дефисы
+    slug = re.sub(r'-+', '-', slug).strip('-')  # Убираем двойные дефисы
+    return slug
+
+# 🔹 📌 Функция сохранения статьи
 def save_blog_post(title, content, all_keywords):
     content = markdown_to_html(content)  # Преобразование Markdown в HTML
-    filename = f"{datetime.now().date()}-{title.lower().replace(' ', '-').replace('?', '')}.html"
-    filepath = os.path.join(BLOG_FOLDER, filename)
-    keywords_str = ", ".join(all_keywords)  # Преобразуем список ключевых слов в строку
+    
+    slug = generate_slug(title)  # Генерируем slug для URL
+    filename = f"{datetime.now().date()}-{slug}.html"  # Создаём имя файла
+    filepath = os.path.join(BLOG_FOLDER, filename)  # Полный путь
+    
+    keywords_str = ", ".join(all_keywords)  # Преобразуем ключевые слова в строку
 
 
     html_template = f"""
@@ -154,12 +165,20 @@ def save_blog_post(title, content, all_keywords):
     <head>
         <title>{title} | Somnia AI</title>
         <meta name="description" content="{title}">
-        <meta name="keywords" content="{keywords_str}">
+        <meta name="keywords" content="{keywords_str}"> 
+        
+        <!-- Canonical URL -->
+        <link rel="canonical" href="https://somnia-ai.com/blog/{filename}">     
+        
+        <!-- Стили -->
+        <link rel="stylesheet" href="../css/blog.css">       
     </head>
     <body>
-        <p>{content.replace('\n', '<br>')}</p>
-        <hr>
-        <a href="blog.html">🔙 Вернуться к блогу</a>
+        <div class="container">
+            <p>{content.replace('\n', '<br>')}</p>
+            <hr>
+            <a href="blog.html">🔙 Вернуться к блогу</a>
+        </div>    
     </body>
     </html>
     """
