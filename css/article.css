@@ -71,7 +71,7 @@ hr {
 a {
     display: block; /* Превращаем кнопку в блочный элемент для центрирования */
     text-align: center;
-    background: #0073e6;
+    background: linear-gradient(90deg, #7443FF, #A062FF);
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
@@ -83,7 +83,7 @@ a {
 }
 
 a:hover {
-    background: #005bb5;
+    background: linear-gradient(90deg, #5a34cc, #8249e0);
 }
 
 

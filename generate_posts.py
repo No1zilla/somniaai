@@ -195,27 +195,38 @@ def update_blog_index(title, filename):
     index_path = os.path.join(BLOG_FOLDER, BLOG_INDEX)
 
     articles = []
+    existing_filenames = set()
+
     if os.path.exists(index_path):
         with open(index_path, "r", encoding="utf-8") as f:
             # Читаем существующий список статей, исключая лишние теги
-            articles = [
-                line for line in f.readlines() 
-                if line.strip().startswith("<li>")
-            ]
+            for line in f:
+                if line.strip().startswith("<li>"):
+                    articles.append(line)
+                    match = re.search(r'href="([^"]+)"', line)
+                    if match:
+                        existing_filenames.add(match.group(1))  # Сохраняем уже добавленные ссылки
+
+    # ✅ Проверяем, есть ли уже такая статья в списке
+    if filename in existing_filenames:
+        print(f"⚠️ Дубликат! Статья с таким filename уже есть: {filename}")
+        return  # Не добавляем повторно
+
+    # ✅ Проверяем, содержит ли filename кириллические символы
+    if re.search(r'[а-яА-Я]', filename):
+        print(f"⚠️ Ошибка! Filename содержит кириллицу и не будет добавлен: {filename}")
+        return  # Не добавляем русскую ссылку
 
     # Создаём новую запись для списка
     new_entry = f'<li><a href="{filename}">{title}</a></li>\n'
     articles.insert(0, new_entry)  # Добавляем новую статью в начало
-
-    # Убираем дубликаты
-    unique_articles = list(dict.fromkeys(articles))
 
     # Перезаписываем индексный файл
     with open(index_path, "w", encoding="utf-8") as f:
         f.write("<html>\n<head>\n<title>Блог Somnia AI</title>\n</head>\n<body>\n")
         f.write('<link rel="stylesheet" href="../css/blog.css">\n')  # ✅ Добавляем стили
         f.write("<h1>📚 Блог Somnia AI</h1>\n<ul>\n")
-        f.writelines(unique_articles)  # Уникальные записи
+        f.writelines(articles)  # Уникальные записи
         f.write("</ul>\n</body>\n</html>\n")
 
     print("✅ Блог-индекс обновлён!")

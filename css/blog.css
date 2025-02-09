@@ -1,57 +1,94 @@
-body {
-    font-family: Arial, sans-serif;
+/* Сброс стилей */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+/* Основные стили */
+body {
+    font-family: Arial, sans-serif;
     background: #f9f9f9;
     color: #333;
-}
-.container {
-    width: 80%;
-    max-width: 1200px;
-    margin: auto;
+    text-align: center;
     padding: 20px;
 }
-header {
-    background: #0073e6;
-    color: #fff;
-    padding: 15px 0;
-    text-align: center;
+
+/* Контейнер блога */
+.container {
+    max-width: 800px; /* Ограничение ширины на десктопе */
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-nav ul {
+
+/* Заголовок */
+h1 {
+    font-size: 28px;
+    color: #2c2c54;
+    margin-bottom: 20px;
+}
+
+/* Список статей */
+ul {
     list-style: none;
     padding: 0;
 }
-nav ul li {
-    display: inline;
-    margin: 0 15px;
-}
-nav ul li a {
-    color: #fff;
-    text-decoration: none;
-}
-.blog-list {
-    margin: 20px 0;
-}
-.blog-post {
+
+/* Карточка статьи */
+li {
     background: #fff;
     padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    max-width: 800px; /* Ограничение ширины на десктопе */
+    margin-left: auto; /* Центрирование карточек */
+    margin-right: auto;
 }
-.blog-post h2 a {
-    color: #0073e6;
-    text-decoration: none;
+
+/* Эффект при наведении */
+li:hover {
+    transform: scale(1.02);
 }
-.read-more {
-    color: #0073e6;
+
+/* Ссылка на статью */
+li a {
     text-decoration: none;
+    color: #2c2c54;
+    font-size: 18px;
     font-weight: bold;
+    display: block;
+    padding: 10px;
+    transition: color 0.3s;
 }
+
+/* Эффект при наведении на ссылку */
+li a:hover {
+    color: #2c2c54;
+}
+
+/* Подвал */
 footer {
-    background: #333;
-    color: #fff;
-    text-align: center;
-    padding: 10px 0;
     margin-top: 20px;
+    padding: 10px;
+    background: #2c2c54;
+    color: white;
+    text-align: center;
+    border-radius: 10px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .container {
+        max-width: 100%; /* Убираем ограничение ширины на мобильных */
+        padding: 15px;
+    }
+
+    li {
+        max-width: 100%; /* Карточки на всю ширину экрана */
+    }
 }
