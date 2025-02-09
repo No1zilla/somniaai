@@ -19,7 +19,7 @@
 
         .container {
             width: 90%;
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
@@ -34,28 +34,33 @@
         }
 
         .header-container {
-            width: 90%;
-            max-width: 1200px;
+            width: 100%; /* Изменено с 90% на 100% */
+            max-width: 600px; /* Можно убрать или оставить в зависимости от дизайна */
             margin: 0 auto;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column; /* Новое: элементы теперь упорядочены вертикально */
+            align-items: center; /* Центрирование элементов по горизонтали */
         }
 
         header .logo {
-            text-align: left;
+            text-align: center; /* Изменено с left на center */
+            width: 100%; /* Занимает всю ширину контейнера */
+            margin-bottom: 10px; /* Увеличенный нижний отступ */
         }
 
         .nav-links-container {
             display: flex;
-            justify-content: flex-end;
-            flex: 1;
+            justify-content: center; /* Центрирование навигационных ссылок */
+            width: 100%; /* Занимает всю ширину контейнера */
         }
 
         .nav-links {
             display: flex;
             list-style: none;
             gap: 20px;
+            padding: 0; /* Убедитесь, что нет внутренних отступов мешающих центрированию */
+            justify-content: center; /* Центрирование ссылок внутри контейнера */
+            flex-wrap: wrap; /* Перенос элементов на новую строку при нехватке места */
         }
 
         .nav-links a {
@@ -68,29 +73,36 @@
             color: #A062FF;
         }
 
+
         /* Главный экран (Hero Section) */
         .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('night-landscape.webp') no-repeat center center/cover;
+            background: linear-gradient(rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.88)), url('night-landscape.webp') no-repeat center center/cover;
             text-align: center;
-            padding: 310px 20px;
+            padding: 0; /* Убран большой padding, который выталкивал содержимое вниз */
             color: #fff;
             margin: 10px 0;
             border-radius: 20px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            min-height: 100vh; /* Убедитесь, что секция охватывает весь экран */
-            width: 100%; /* Чтобы фоновое изображение растягивалось на весь экран */
-        }        
+            min-height: 100vh; /* Секция охватывает весь экран */
+            width: 100%; /* Фоновое изображение растягивается на весь экран */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Центрирование содержимого по вертикали */
+            align-items: center; /* Центрирование содержимого по горизонтали */
+        }
 
         .hero h2 {
             font-size: 48px;
             margin-bottom: 20px; /* Увеличен нижний отступ */
             text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            max-width: 800px; /* Максимальная ширина заголовка */
         }
 
         .hero p {
             font-size: 20px;
             margin-bottom: 40px; /* Увеличен нижний отступ */
-            -webkit-text-stroke: 0.5px #000000; /* Добавлена обводка черным цветом */
+            -webkit-text-stroke: 0.5px #000000; /* Обводка черным цветом */
+            max-width: 800px; /* Максимальная ширина параграфа */
         }
 
         .hero .btn {
@@ -100,7 +112,37 @@
             font-size: 18px;
             font-weight: 500;
             transition: background-color 0.3s, box-shadow 0.3s;
+            max-width: 800px; /* Максимальная ширина кнопки */
         }
+
+        /* Медиа-запросы для мобильных устройств */
+        @media (max-width: 768px) {
+            .hero {
+                padding-top: 20px; /* Уменьшение верхнего отступа */
+                padding-bottom: 20px; /* Оставляем некоторый отступ снизу для визуального баланса */
+                padding-left: 20px; /* Боковые отступы для предотвращения прилипания текста к краям */
+                padding-right: 20px;
+            }
+
+            .hero h2 {
+                font-size: 32px; /* Адаптированный размер шрифта для мобильных устройств */
+                margin-top: 0; /* Уменьшаем или убираем верхний отступ, если необходимо */
+                margin-bottom: 20px; /* Уменьшаем нижний отступ */
+            }
+
+            .hero p {
+                font-size: 16px; /* Адаптированный размер шрифта для мобильных устройств */
+                margin-bottom: 30px; /* Уменьшаем нижний отступ */
+            }
+
+            .hero .btn {
+                font-size: 16px; /* Адаптированный размер шрифта для кнопок */
+                padding: 10px 20px; /* Адаптированный padding для кнопок */
+                margin-bottom: 60px; /* Дополнительный нижний отступ для кнопок */
+            }
+        }
+
+
 
         /* Остальные стили для кнопок */
         .btn-primary {
@@ -136,7 +178,7 @@
 
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 800px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -203,24 +245,6 @@
 
         .buttons {
             margin-top: 20px;
-        }
-
-        .screenshot {
-            flex: 1;
-            text-align: center;
-        }
-
-        .screenshot img {
-            width: 300px;
-            height: auto;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .screenshot img:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
         }
 
         /* Button Styles */
