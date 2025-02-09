@@ -171,7 +171,7 @@ def save_blog_post(title, content, all_keywords):
         <link rel="canonical" href="https://somnia-ai.com/blog/{filename}">     
         
         <!-- Стили -->
-        <link rel="stylesheet" href="../css/blog.css">       
+        <link rel="stylesheet" href="../css/article.css">       
     </head>
     <body>
         <div class="container">
@@ -185,7 +185,9 @@ def save_blog_post(title, content, all_keywords):
 
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(html_template)
-    
+
+    update_blog_index(title, filename)  # ✅ Теперь передаём filename (slug) в update_blog_index()
+
     print(f"✅ Статья сохранена: {filepath}")
 
 # 🔹 📌 Обновление индекса блога
@@ -211,6 +213,7 @@ def update_blog_index(title, filename):
     # Перезаписываем индексный файл
     with open(index_path, "w", encoding="utf-8") as f:
         f.write("<html>\n<head>\n<title>Блог Somnia AI</title>\n</head>\n<body>\n")
+        f.write('<link rel="stylesheet" href="../css/blog.css">\n')  # ✅ Добавляем стили
         f.write("<h1>📚 Блог Somnia AI</h1>\n<ul>\n")
         f.writelines(unique_articles)  # Уникальные записи
         f.write("</ul>\n</body>\n</html>\n")
