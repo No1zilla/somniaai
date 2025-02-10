@@ -1,15 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Somnia AI Сонник Нейросеть | Толкование снов с ИИ</title>
+    <title>Сонник Нейросеть | Somnia AI – Толкование снов с ИИ</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-    <!-- Добавление мета-описания -->
-    <meta name="description" content="Откройте путь к подсознанию с помощью Somnia AI — уникального сонника, работающего на базе нейросети. Анализируйте свои сны, получайте глубокие инсайты и ответы на важные вопросы, как с личным психологом.  Используйте наш Telegram бот для глубокого понимания ваших сновидений.">
+    <!-- Улучшенное мета-описание для SEO -->
+    <meta name="description" content="Somnia AI – онлайн сонник на основе нейросети! Анализируйте свои сны с искусственным интеллектом. Получите точное толкование сна прямо сейчас!">
+    <meta name="keywords" content="сонник нейросеть, анализ снов, толкование снов, искусственный интеллект, ИИ сонник, к чему снится, осознанные сновидения, значение снов, видеть во сне">
 
     <meta name="zen-verification" content="WfZcGtZCYNrAIJ1rmZDoYpn9aVUX2w84Sf6NfNzornVIAKnyZpOjz6BhefMYRxn3" />
+
+    <!-- Open Graph для соцсетей -->
+    <meta property="og:title" content="Somnia AI – Сонник Нейросеть для Толкования Снов">
+    <meta property="og:description" content="Somnia AI – первый сонник на основе ИИ! Анализируйте свои сны и получайте точные интерпретации. Попробуйте бесплатно!">
+    <meta property="og:image" content="https://somnia-ai.com/images/preview.jpg">
+    <meta property="og:url" content="https://somnia-ai.com/">
+
 
     <!-- Google Tag Manager -->
     <script>
@@ -37,8 +45,8 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "url": "https://somnia-ai.com/",
-      "name": "Somnia AI",
-      "description": "Somnia AI Сонник Нейросеть Толкование снов ИИ",
+      "name": "Somnia AI – Сонник Нейросеть",
+      "description": "Somnia AI – уникальный сонник на базе нейросети, который анализирует и интерпретирует сны.",
       "author": {
         "@type": "Organization",
         "name": "Somnia AI"
@@ -69,7 +77,7 @@
     <header>
         <div class="header-container">
             <div class="logo">
-                <h1>Somnia AI</h1>
+                <h1>Somnia AI Сонник Нейросеть </h1> <!-- Улучшенный H1 для SEO -->
             </div>
             <nav class="nav-links-container">
                 <ul class="nav-links">
@@ -95,8 +103,8 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h2>Анализируйте свои сны с помощью нейросети Somnia AI</h2>
-            <p>Раскройте тайны своего подсознания с помощью толкования снов на базе искусственного интеллекта.</p>
+            <h2>Толкование снов искусственным интеллектом</h2> <!-- Улучшенный H2 -->
+            <p>К чему снится ваш сон? Введите текст сна и получите его точную интерпретацию от нашей нейросети.</p>
 
                 <!-- Форма ввода сна -->
                 <div id="dreamForm">
@@ -107,7 +115,7 @@
                 <!-- Контейнер для отображения интерпретации -->
                 <div id="responseContainer" style="display: none;"></div>
                     <div class="hero-buttons">
-                    <a href="https://t.me/SomniaAI_bot?start=site1" class="btn btn-primary" target="_blank">Продолжить анализ в телеграмм</a>
+                    <a href="https://t.me/SomniaAI_bot?start=site1" class="btn btn-primary" target="_blank">Перейти в Telegram</a>
                         <a href="#how-it-works" class="btn btn-secondary">Узнать больше</a>
                     </div>
         </div>
@@ -120,12 +128,12 @@
         const dreamForm = document.getElementById('dreamForm'); // Предполагается, что у формы есть этот ID
 
         // Показываем сохраненную интерпретацию сна, если она есть
-        const savedInterpretation = localStorage.getItem('dreamInterpretation');
-        if (savedInterpretation) {
-            responseContainer.innerHTML = savedInterpretation;
-            dreamForm.style.display = 'none'; // Скрываем форму
-            responseContainer.style.display = 'block'; // Показываем интерпретацию
-        }
+        //const savedInterpretation = localStorage.getItem('dreamInterpretation');
+        //if (savedInterpretation) {
+        //    responseContainer.innerHTML = savedInterpretation;
+        //    dreamForm.style.display = 'none'; // Скрываем форму
+        //    responseContainer.style.display = 'block'; // Показываем интерпретацию
+        //}
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
             const dreamText = document.getElementById('dreamInput').value;
@@ -185,7 +193,7 @@
 
                 <!-- Text and Buttons -->
                 <div class="description">
-                    <h3>Откройте мир анализа снов</h3>
+                    <h3>Откройте мир анализа снов бесплатно</h3>
                     <p>Используйте наш Telegram бот для анализа ваших снов с помощью ИИ. Добавьте свой сон, и Somnia AI предоставит глубокий анализ и полезные инсайты.</p>
                     <div class="buttons">
                         <a href="https://t.me/SomniaAI_bot?start=site2" class="btn btn-primary">Начать анализ сна</a>
@@ -199,23 +207,23 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <h3>Особенности</h3>
+            <h2>Часто задаваемые вопросы о Somnia AI</h2>
             <div class="feature-list">
                 <div class="feature">
-                    <h4>Анализ</h4>
-                    <p>Наш бот-анализатор снов использует искусственный интеллект для быстрой и точной интерпретации ваших снов.</p>
+                    <h3>Что такое Somnia AI?</h3>
+                    <p>Somnia AI — это онлайн-сонник с искусственным интеллектом, анализирующий ваши сны и раскрывающий их смысл.</p>
                 </div>
                 <div class="feature">
-                    <h4>Личный дневник</h4>
-                    <p>Сохраняйте свои сны и их толкования в одном месте для легкого доступа и размышлений.</p>
+                    <h3>Как работает анализ сна?</h3>
+                    <p>Вы вводите свой сон, и нейросеть мгновенно предоставляет толкование, используя передовые технологии анализа.</p>
                 </div>
                 <div class="feature">
-                    <h4>Статистика</h4>
-                    <p>Отслеживайте повторяющиеся символы сна и темы сновидений для лучшего понимания.</p>
+                    <h3>Можно ли пользоваться бесплатно?</h3>
+                    <p>Да, базовый анализ сна доступен бесплатно в нашем приложении и Telegram-боте.</p>
                 </div>
                 <div class="feature">
-                    <h4>Канал в Telegram</h4>
-                    <p>Получите доступ к ресурсам для анализа снов и осознанного сновидения.</p>
+                    <h3>Как сохранить и отслеживать свои сны?</h3>
+                    <p>Somnia AI позволяет вести личный дневник снов, анализировать символы и отслеживать повторяющиеся образы.</p>
                 </div>
             </div>
         </div>
@@ -239,7 +247,7 @@
     <!-- Call to Action -->
     <section class="cta">
         <div class="container">
-            <h3>Готовы исследовать свои сны?</h3>
+            <h3>Готовы исследовать свои сны ?</h3>
             <p>Подключайтесь к Somnia AI и начните свой путь к осознанным снам.</p>
             <a href="https://t.me/SomniaAI_bot?start=site3" class="btn btn-primary">Начать сейчас</a>
         </div>
