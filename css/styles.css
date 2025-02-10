@@ -83,7 +83,7 @@
             margin: 10px 0;
             border-radius: 20px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            min-height: 100vh; /* Секция охватывает весь экран */
+            min-height: 88vh; /* Секция охватывает весь экран */
             width: 100%; /* Фоновое изображение растягивается на весь экран */
             display: flex;
             flex-direction: column;
@@ -113,6 +113,8 @@
             font-weight: 500;
             transition: background-color 0.3s, box-shadow 0.3s;
             max-width: 800px; /* Максимальная ширина кнопки */
+            gap: 20px; /* Одинаковое расстояние между кнопками */
+
         }
 
         /* Медиа-запросы для мобильных устройств */
@@ -138,7 +140,9 @@
             .hero .btn {
                 font-size: 16px; /* Адаптированный размер шрифта для кнопок */
                 padding: 10px 20px; /* Адаптированный padding для кнопок */
-                margin-bottom: 60px; /* Дополнительный нижний отступ для кнопок */
+                margin-bottom: 10px; /* Дополнительный нижний отступ для кнопок */
+                gap: 20px; /* Одинаковое расстояние между кнопками */
+
             }
         }
 
@@ -257,6 +261,7 @@
             transition: background-color 0.3s, box-shadow 0.3s;
             text-align: center;
             margin-top: 10px;
+            width: 300px; /* Фиксированная ширина */
         }
 
         .btn-primary {
@@ -322,7 +327,6 @@
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 40px;
-            width: 250px;
             height: auto;
             text-align: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -425,73 +429,105 @@
         text-align: center;
     }
 
-    #dreamInput {
+    #dreamForm {
+        display: flex;
+        flex-direction: column; /* Поле и кнопка расположены вертикально */
+        align-items: center; /* Центрируем элементы по горизонтали */
+        gap: 15px; /* Расстояние между полем и кнопкой */
         width: 100%;
-        margin-bottom: 10px;
-        padding: 10px;
-        border-radius: 8px;
-        border: none;
-        background: rgba(255, 255, 255, 0.8);
+        max-width: 600px; /* Ограничение ширины формы */
+        margin: 0 auto; /* Центрирование формы */
     }
+        /* Стили для поля ввода сна */
+        #dreamInput {
+            width: 100%;
+            height: auto;
+            min-height: 150px;
+            max-width: 600px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            box-sizing: border-box;
+            outline: none;
+            transition: box-shadow 0.3s;
+        }
 
-    #submitBtn {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        border-radius: 8px;
-        background: linear-gradient(90deg, #7443FF, #A062FF);
-        color: #fff;
-        text-align: center;
-        border: none;
-        cursor: pointer;
-        transition: background-color 0.3s, box-shadow 0.3s;
-    }
+        #dreamInput:focus {
+            box-shadow: 0 0 10px rgba(116, 67, 255, 0.5);
+        }
 
-    #submitBtn:hover {
-        background: linear-gradient(90deg, #5a34cc, #8249e0);
-        box-shadow: 0 5px 15px rgba(116, 67, 255, 0.8);
-    }
+        /* Стили для кнопки отправки */
+        #submitBtn {
+            display: inline-block; /* Убедитесь, что кнопка ведет себя как элемент кнопки */
+            max-width: 300px; /* Ограничение ширины, если нужно */
+            text-align: center; /* Выравнивание текста внутри кнопки */
+        }
 
-    .error {
-        color: red;
-        font-weight: bold;
-        text-align: center;
-    }
+        /* Ошибки */
+        .error {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+        }
 
-    .response {
-        color: #ffffff;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 10px;
-        border-radius: 8px;
-        margin-top: 10px;
-    }
+        /* Ответ */
+        .response {
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto; /* Прокрутка для длинных текстов */
+        }
+        
+        .response h3 {
+            text-align: left;
+            color: #A062FF;
+            margin-bottom: 15px;
+        }
+        
+        .response h4 {
+            font-size: 18px;
+            color: #FFD700;
+            margin: 10px 0;
+            text-align: left;
+        }
+        
+        .response p {
+            margin: 5px 0; /* Уменьшаем отступы между абзацами */
+            line-height: 1.6; /* Плотность текста */
+        }
+        
+        .response strong {
+            font-weight: bold;
+            color: #A062FF; /* Цвет для выделения текста */
+        }
+        
+        .response br {
+            display: block;
+            line-height: 1.2; /* Плотный текст с минимальными разрывами */
+        }
+        
 
-    .response h3 {
-        text-align: center;
-        color: #A062FF;
-    }
+        /* Медиа-запросы для десктопов */
+        @media (min-width: 1024px) {
+            #dreamInput, #submitBtn {
+                width: 800px;
+                margin: 20px auto;
+            }
 
-    .response p {
-        font-size: 16px;
-        color: #ffffff;
-    }
+            .dream-input-section, .response, .container {
+                width: 70%;
+                margin: 0 auto;
+            }
 
-/* Медиа-запросы для десктопов */
-@media (min-width: 1024px) {
-    #dreamInput, #submitBtn {
-        width: 50%;  /* Ограничиваем ширину до 50% на десктопах */
-        margin: 20px auto; /* Центрируем и добавляем вертикальные отступы */
-    }
-
-    .dream-input-section, .response, .container {
-        width: 70%; /* Устанавливаем ширину 70% для контейнера и секций ввода и ответа */
-        margin: 0 auto; /* Центрирование блоков */
-    }
-
-    .dream-input-section, .response {
-        padding: 20px; /* Добавляем отступы для лучшей визуализации */
-        display: flex; /* Использование flexbox для лучшего распределения пространства */
-        flex-direction: column; /* Элементы расположены вертикально */
-        align-items: center; /* Центрирование содержимого по горизонтали */
-    }
-}
+            .dream-input-section, .response {
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }

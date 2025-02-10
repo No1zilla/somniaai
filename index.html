@@ -109,7 +109,7 @@
                 <!-- Форма ввода сна -->
                 <div id="dreamForm">
                     <textarea id="dreamInput" placeholder="Введите ваш сон для анализа..."></textarea>
-                    <button id="submitBtn">Отправить сон</button>
+                    <button id="submitBtn" class="btn btn-secondary">Отправить сон</button>
                 </div>
 
                 <!-- Контейнер для отображения интерпретации -->
@@ -128,12 +128,12 @@
         const dreamForm = document.getElementById('dreamForm'); // Предполагается, что у формы есть этот ID
 
         // Показываем сохраненную интерпретацию сна, если она есть
-        //const savedInterpretation = localStorage.getItem('dreamInterpretation');
-        //if (savedInterpretation) {
-        //    responseContainer.innerHTML = savedInterpretation;
-        //    dreamForm.style.display = 'none'; // Скрываем форму
-        //    responseContainer.style.display = 'block'; // Показываем интерпретацию
-        //}
+        const savedInterpretation = localStorage.getItem('dreamInterpretation');
+        if (savedInterpretation) {
+            responseContainer.innerHTML = savedInterpretation;
+            dreamForm.style.display = 'none'; // Скрываем форму
+            responseContainer.style.display = 'block'; // Показываем интерпретацию
+        }
 
         document.getElementById('submitBtn').addEventListener('click', async () => {
             const dreamText = document.getElementById('dreamInput').value;
@@ -161,7 +161,12 @@
                     const interpretationHTML = `
                         <div class="response">
                             <h3>Интерпретация:</h3>
-                            <p>${data.interpretation}</p>
+                            ${data.interpretation
+                                .replace(/\n/g, '<br>') // Заменяем разрывы строк на <br>
+                                .replace(/(\d+\.\s.+?)(?=(\d+\.\s)|$)/g, '<p><strong>$1</strong></p>') // Преобразуем числа в параграфы
+                                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Преобразуем **жирный текст** в <strong>
+                                .replace(/#(.+?)#/g, '<h4>$1</h4>') // Преобразуем текст между # в заголовки
+                            }
                         </div>
                     `;
                     responseContainer.innerHTML = interpretationHTML;
