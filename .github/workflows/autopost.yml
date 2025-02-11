@@ -2,7 +2,7 @@ name: Auto Post Content
 
 on:
   schedule:
-    - cron: "0 9 * * *"  # Запуск каждый день в 9:00 UTC (12:00 по Москве)
+    - cron: "0 11 * * *"  # Запуск каждый день в 11:00 UTC (14:00 по Москве)
   workflow_dispatch:  # Возможность запустить вручную
 
 jobs:
