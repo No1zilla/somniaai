@@ -38,7 +38,7 @@ SEO_KEYWORDS = [
 ADVERTISEMENTS = [
     "🔮 Расшифруйте ваши сны с помощью Нейросети → Somnia AI https://t.me/SomniaAI_bot",
     "📢 Подписывайтесь на наш канал Психология сновидений → telegram somnia_ai https://t.me/somnia_ai",
-    "🌐 Интересные статьи о снах читайте на нашем сайте → somnia-ai.com https://somnia-ai.com/",
+    "🌐 Интересные статьи о снах читайте в блоге на нашем сайте → somnia-ai.com https://somnia-ai.com/",
     "📲 Спросите Нейросеть Somnia AI про ваш сон в приложении → RuStore https://www.rustore.ru/catalog/app/com.somniaai.app"
 ]
 
@@ -273,7 +273,8 @@ if topic:
 
     # 🌍 Публикация в блог
     if blog_post_text:
-        save_blog_post(topic, blog_post_text, blog_keywords)
+        blog_post_with_ad = f"{blog_post_text}\n\n<hr>\n<p><strong>{ad}</strong></p>"  # ✅ Добавляем рекламу в блог-статью
+        save_blog_post(topic, blog_post_with_ad, blog_keywords)
         update_blog_index(topic, f"{datetime.now().date()}-{topic.lower().replace(' ', '-').replace('?', '')}.html")
 
 else:
