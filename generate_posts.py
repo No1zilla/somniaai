@@ -94,7 +94,7 @@ def generate_post(topic, platform, length, style):
         2) Дай толкование в юнгианском стиле: символы, конфликт, вывод.  
         Используй {' и '.join(all_keywords)} 2–3 раза.
         Формат: {"не более 2–3 коротких абзацев с эмодзи" if length=="short" else "лонгрид 4–5 абзацев: сон, символ, анализ, вывод"}.
-        В конце: 1–2 вопроса, много эмодзи, источник (Юнг/Хиллман/фон Франц).
+        В конце: 1–2 вопроса, много эмодзи, достоверный источник.
         """
 
         response = client.chat.completions.create(
@@ -158,29 +158,47 @@ def save_blog_post(title, content, all_keywords):
     filepath = os.path.join(BLOG_FOLDER, filename)  # Полный путь
     
     keywords_str = ", ".join(all_keywords)  # Преобразуем ключевые слова в строку
-
-
+    
     html_template = f"""
-    <html>
-    <head>
-        <title>{title} | Somnia AI</title>
-        <meta name="description" content="{title}">
-        <meta name="keywords" content="{keywords_str}"> 
-        
-        <!-- Canonical URL -->
-        <link rel="canonical" href="https://somnia-ai.com/blog/{filename}">     
-        
-        <!-- Стили -->
-        <link rel="stylesheet" href="../css/article.css">       
-    </head>
-    <body>
-        <div class="container">
-            <p>{content.replace('\n', '<br>')}</p>
-            <hr>
-            <a href="blog.html">🔙 Вернуться к блогу</a>
-        </div>    
-    </body>
-    </html>
+        <html>
+        <head>
+            <title>{title} | Somnia AI</title>
+            <meta name="description" content="{title}">
+            <meta name="keywords" content="{keywords_str}"> 
+            
+            <!-- Canonical URL -->
+            <link rel="canonical" href="https://somnia-ai.com/blog/{filename}">     
+            
+            <!-- Стили -->
+            <link rel="stylesheet" href="../css/article.css">       
+        </head>
+        <body>
+            <div class="container">
+                <p>{content.replace('\n', '<br>')}</p>
+    
+                <hr>
+                
+                <!-- 🔥 Блок ссылок на все сервисы Somnia AI -->
+                <div class="somnia-links">
+                    <p>🔮 Расшифруйте ваши сны с помощью Нейросети
+                        <a href="https://t.me/SomniaAI_bot" target="_blank">Перейти в Telegram </a>
+                    </p>
+    
+                    <p>📢 Подписывайтесь на наш канал в tg → 
+                        <a href="https://t.me/somnia_ai" target="_blank">@somnia_ai</a>
+                    </p>
+    
+                    <p>📲 Приложение Somnia AI в RuStore → 
+                        <a href="https://www.rustore.ru/catalog/app/com.somniaai.app" target="_blank">Скачать</a>
+                    </p>
+                </div>
+    
+                <hr>
+    
+                <a href="blog.html">🔙 Вернуться к блогу</a>
+            </div>    
+        </body>
+        </html>
     """
 
     with open(filepath, "w", encoding="utf-8") as f:
@@ -270,13 +288,10 @@ if topic:
         clean_vk_text = vk_post_text.replace("#", "").replace("*", "")  # Убираем Markdown-символы
         hashtags = " ".join([f"#{word.replace(' ', '_')}" for word in vk_keywords])  # Генерация хэштегов
         post_to_vk(f"{clean_vk_text}\n\n{ad}", hashtags)  # Отправляем очищенный текст с рекламой и хэштегами
-
-
+        
     # 🌍 Публикация в блог
     if blog_post_text:
-        blog_post_with_ad = f"{blog_post_text}\n\n<hr>\n<p><strong>{ad}</strong></p>"  # ✅ Добавляем рекламу в блог-статью
-        save_blog_post(topic, blog_post_with_ad, blog_keywords)
-        #update_blog_index(topic, f"{datetime.now().date()}-{topic.lower().replace(' ', '-').replace('?', '')}.html")
+        save_blog_post(topic, blog_post_text, blog_keywords)
 
 else:
     print("❌ Сегодня нет темы для публикации.")
