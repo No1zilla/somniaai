@@ -1,11 +1,34 @@
-<html>
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-<title>Блог Somnia AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Блог Somnia AI | Анализ снов и психология сновидений</title>
+<meta name="description" content="Статьи Somnia AI о психологии сновидений, символах сна и практиках самопонимания. Выбирайте темы, читайте лонгриды и находите полезные инсайты.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://somnia-ai.com/blog/blog.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/blog.css">
 </head>
 <body>
-<link rel="stylesheet" href="../css/blog.css">
-<h1>📚 Блог Somnia AI</h1>
-<ul>
+<main class="page">
+  <section class="blog-top">
+    <h1>Блог Somnia AI</h1>
+    <p>Подборка материалов о снах, архетипах и внутренней динамике. Используйте поиск и фильтр по году, чтобы быстро найти нужную статью.</p>
+  </section>
+  <section class="blog-controls" aria-label="Фильтры статей">
+    <input id="blog-search" class="control" type="search" placeholder="Поиск по заголовку статьи">
+    <select id="blog-year" class="control">
+      <option value="all">Все годы</option>
+    </select>
+  </section>
+  <div class="meta-row">
+    <span id="articles-total">0 статей</span>
+    <span>Обновляется автоматически при публикации новых статей</span>
+  </div>
+  <ul id="articles-list">
 <li><a href="2026-04-14-pepel-utrat-i-novye-nachala.html">Пепел утрат и новые начала</a></li>
 <li><a href="2026-04-12-vospominanija-o-proshlom-i-poisk-novogo-puti.html">Воспоминания о прошлом и поиск нового пути</a></li>
 <li><a href="2026-04-11-kopaja-proshloe.html">Копая прошлое</a></li>
@@ -241,5 +264,9 @@
 <li><a href="2025-01-30-почему-снятся-зомби:-психология-сновидений.html">Почему снятся зомби: психология сновидений</a></li>
 <li><a href="2025-01-30-сновидения-и-их-значение-в-жизни-человека.html">Сновидения и их значение в жизни человека</a></li>
 </ul>
+  <div id="pagination" class="pagination" aria-label="Навигация по страницам блога"></div>
+  <p class="blog-back"><a href="../index.html">На главную Somnia AI</a></p>
+</main>
+<script src="../js/blog.js"></script>
 </body>
 </html>

@@ -1,94 +1,224 @@
-/* Сброс стилей */
+:root {
+  --ink: #09081a;
+  --ink-soft: #12102a;
+  --paper: #f2ece0;
+  --paper-soft: #c4b99f;
+  --paper-muted: #8a7f6b;
+  --violet: #7c6ff5;
+  --violet-soft: #a99dff;
+  --line: rgba(242, 236, 224, 0.16);
+  --line-strong: rgba(169, 157, 255, 0.35);
+  --card: rgba(18, 16, 42, 0.88);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  --serif: "Cormorant Garamond", Georgia, serif;
+  --sans: "DM Sans", system-ui, sans-serif;
+}
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Основные стили */
 body {
-    font-family: Arial, sans-serif;
-    background: #f9f9f9;
-    color: #333;
-    text-align: center;
-    padding: 20px;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(124, 111, 245, 0.2), transparent 55%),
+    radial-gradient(900px 500px at 90% 20%, rgba(169, 157, 255, 0.14), transparent 60%),
+    var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  line-height: 1.55;
+  padding: 40px 18px 56px;
 }
 
-/* Контейнер блога */
-.container {
-    max-width: 800px; /* Ограничение ширины на десктопе */
-    margin: 0 auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.page {
+  width: min(1120px, 100%);
+  margin: 0 auto;
 }
 
-/* Заголовок */
-h1 {
-    font-size: 28px;
-    color: #2c2c54;
-    margin-bottom: 20px;
+.blog-top {
+  border: 1px solid var(--line);
+  background: linear-gradient(140deg, rgba(18, 16, 42, 0.9), rgba(18, 16, 42, 0.65));
+  border-radius: 20px;
+  padding: clamp(20px, 4vw, 34px);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
 }
 
-/* Список статей */
-ul {
-    list-style: none;
-    padding: 0;
+.blog-top h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(36px, 6vw, 56px);
+  line-height: 1.05;
+  margin-bottom: 10px;
 }
 
-/* Карточка статьи */
-li {
-    background: #fff;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease-in-out;
-    max-width: 800px; /* Ограничение ширины на десктопе */
-    margin-left: auto; /* Центрирование карточек */
-    margin-right: auto;
+.blog-top p {
+  max-width: 760px;
+  color: var(--paper-soft);
+  font-size: clamp(15px, 2.2vw, 18px);
 }
 
-/* Эффект при наведении */
-li:hover {
-    transform: scale(1.02);
+.blog-controls {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
-/* Ссылка на статью */
-li a {
-    text-decoration: none;
-    color: #2c2c54;
-    font-size: 18px;
-    font-weight: bold;
-    display: block;
-    padding: 10px;
-    transition: color 0.3s;
+.control {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(9, 8, 26, 0.8);
+  color: var(--paper);
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 15px;
+  font-family: inherit;
 }
 
-/* Эффект при наведении на ссылку */
-li a:hover {
-    color: #2c2c54;
+.control::placeholder {
+  color: var(--paper-muted);
 }
 
-/* Подвал */
-footer {
-    margin-top: 20px;
-    padding: 10px;
-    background: #2c2c54;
-    color: white;
-    text-align: center;
-    border-radius: 10px;
+select.control {
+  cursor: pointer;
 }
 
-/* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
-    .container {
-        max-width: 100%; /* Убираем ограничение ширины на мобильных */
-        padding: 15px;
-    }
+.control:focus {
+  outline: none;
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px rgba(124, 111, 245, 0.2);
+}
 
-    li {
-        max-width: 100%; /* Карточки на всю ширину экрана */
-    }
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: var(--paper-soft);
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+#articles-list {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+#articles-list li {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+#articles-list li:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+}
+
+#articles-list li a {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 16px;
+}
+
+.article-date {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(169, 157, 255, 0.45);
+  color: var(--violet-soft);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.article-title {
+  font-size: clamp(18px, 2.8vw, 22px);
+  font-family: var(--serif);
+  font-weight: 500;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.article-excerpt {
+  color: var(--paper-soft);
+  font-size: 14px;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.pagination button {
+  border: 1px solid var(--line);
+  background: rgba(18, 16, 42, 0.85);
+  color: var(--paper);
+  border-radius: 8px;
+  min-width: 36px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pagination button[aria-current="page"] {
+  border-color: var(--line-strong);
+  background: rgba(124, 111, 245, 0.25);
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  color: var(--paper-soft);
+  text-align: center;
+}
+
+.blog-back {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.blog-back a {
+  color: var(--violet-soft);
+  text-decoration: none;
+}
+
+.blog-back a:hover {
+  color: var(--paper);
+}
+
+@media (min-width: 700px) {
+  .blog-controls {
+    grid-template-columns: 1fr 220px;
+  }
+
+  #articles-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  body {
+    padding: 28px 12px 40px;
+  }
+
+  #articles-list li a {
+    padding: 14px;
+  }
 }
