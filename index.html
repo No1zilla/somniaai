@@ -804,27 +804,38 @@ document.querySelectorAll('.rev').forEach(el => obs.observe(el));
 /* ── Footer year ── */
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* ── Analyze button → Telegram с текстом сна ── */
-document.getElementById('analyze-btn').addEventListener('click', () => {
+/* ── Analyze button → открывает Telegram с текстом сна в поле ввода ── */
+function openTgWithDream() {
   const text = document.getElementById('dream-input').value.trim();
-
-  // Сохраняем текст в localStorage (опционально)
   if (text) localStorage.setItem('somnia_last_dream', text);
 
-  // Открываем Telegram бот
-  // Если есть текст — передаём через start параметр (до 64 символов)
-  // Для длинных снов просто открываем бот
-  const encoded = encodeURIComponent(text.slice(0, 50).replace(/\s+/g, '_'));
-  const url = text
-    ? `https://t.me/SomniaAI_bot?start=web_${encoded}`
-    : 'https://t.me/SomniaAI_bot?start=site_form';
+  if (text) {
+    // tg://resolve открывает чат и подставляет текст в поле ввода сообщения.
+    // Пользователю остаётся только нажать "Отправить" в Telegram.
+    const encoded = encodeURIComponent(text);
 
-  window.open(url, '_blank');
-});
+    // На мобильных — нативный диплинк (текст в поле ввода)
+    // На десктопе — fallback на web-ссылку с start параметром
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      window.location.href = `tg://resolve?domain=SomniaAI_bot&text=${encoded}`;
+    } else {
+      // Десктоп: открываем telegram desktop / web через t.me
+      // text= параметр поддерживается в ссылках t.me — подставляет текст в поле
+      window.open(`https://t.me/SomniaAI_bot?text=${encoded}`, '_blank');
+    }
+  } else {
+    // Пустое поле — просто открываем бот
+    window.open('https://t.me/SomniaAI_bot?start=site_form', '_blank');
+  }
+}
+
+document.getElementById('analyze-btn').addEventListener('click', openTgWithDream);
 
 /* ── Enter в форме ── */
 document.getElementById('dream-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('analyze-btn').click();
+  if (e.key === 'Enter') openTgWithDream();
 });
 </script>
 </body>
