@@ -7,6 +7,8 @@ import telebot
 import vk_api
 from transliterate import translit
 import re
+import html
+from urllib.parse import quote
 
 # 🔹 API-ключи
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -19,6 +21,7 @@ VK_GROUP_ID = "-229159722"  # ID группы VK (со знаком "-")
 CSV_FILE = "content_plan.csv"
 BLOG_FOLDER = "blog"
 BLOG_INDEX = "blog.html"
+SITE_URL = "https://somnia-ai.com"
 
 # 🔹 Подключаем API
 # 🔹 Создаем экземпляр клиента OpenAI
@@ -186,7 +189,15 @@ def markdown_to_html(text):
     text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
     text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text)
     
-    return text
+    # Разбиваем на смысловые блоки и оборачиваем в <p>, если это не заголовок
+    blocks = [block.strip() for block in re.split(r"\n\s*\n", text) if block.strip()]
+    html_blocks = []
+    for block in blocks:
+        if re.match(r"^<h[1-6]>.*</h[1-6]>$", block):
+            html_blocks.append(block)
+            continue
+        html_blocks.append(f"<p>{block.replace(chr(10), '<br>')}</p>")
+    return "\n".join(html_blocks)
 
 # 🔹 📌 Функция для генерации slug (латинизированный URL)
 def generate_slug(title):
@@ -204,23 +215,30 @@ def save_blog_post(title, content, all_keywords):
     filepath = os.path.join(BLOG_FOLDER, filename)  # Полный путь
     
     keywords_str = ", ".join(all_keywords)  # Преобразуем ключевые слова в строку
+    escaped_title = html.escape(title)
+    escaped_keywords = html.escape(keywords_str)
     
     html_template = f"""
-        <html>
+        <!DOCTYPE html>
+        <html lang="ru">
         <head>
-            <title>{title} | Somnia AI</title>
-            <meta name="description" content="{title}">
-            <meta name="keywords" content="{keywords_str}"> 
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{escaped_title} | Somnia AI</title>
+            <meta name="description" content="{escaped_title}">
+            <meta name="keywords" content="{escaped_keywords}">
+            <meta name="robots" content="index,follow,max-image-preview:large">
             
             <!-- Canonical URL -->
-            <link rel="canonical" href="https://somnia-ai.com/blog/{filename}">     
+            <link rel="canonical" href="{SITE_URL}/blog/{quote(filename)}">     
             
             <!-- Стили -->
             <link rel="stylesheet" href="../css/article.css">       
         </head>
         <body>
             <div class="container">
-                <p>{content.replace('\n', '<br>')}</p>
+                <h1>{escaped_title}</h1>
+                {content}
     
                 <hr>
                 
@@ -251,8 +269,103 @@ def save_blog_post(title, content, all_keywords):
         f.write(html_template)
 
     update_blog_index(title, filename)  # ✅ Теперь передаём filename (slug) в update_blog_index()
+    update_sitemap()
 
     print(f"✅ Статья сохранена: {filepath}")
+
+def extract_date_from_filename(filename):
+    match = re.match(r"^(\d{4})-(\d{2})-(\d{2})-", filename)
+    if not match:
+        return None
+    return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
+
+def build_blog_index_html(articles):
+    items = []
+    for article in articles:
+        items.append(f'<li><a href="{article["filename"]}">{article["title"]}</a></li>')
+
+    return f"""<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Блог Somnia AI | Анализ снов и психология сновидений</title>
+<meta name="description" content="Статьи Somnia AI о психологии сновидений, символах сна и практиках самопонимания. Выбирайте темы, читайте лонгриды и находите полезные инсайты.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="{SITE_URL}/blog/blog.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/blog.css">
+</head>
+<body>
+<main class="page">
+  <section class="blog-top">
+    <h1>Блог Somnia AI</h1>
+    <p>Подборка материалов о снах, архетипах и внутренней динамике. Используйте поиск и фильтр по году, чтобы быстро найти нужную статью.</p>
+  </section>
+  <section class="blog-controls" aria-label="Фильтры статей">
+    <input id="blog-search" class="control" type="search" placeholder="Поиск по заголовку статьи">
+    <select id="blog-year" class="control">
+      <option value="all">Все годы</option>
+    </select>
+  </section>
+  <div class="meta-row">
+    <span id="articles-total">{len(articles)} статей</span>
+    <span>Обновляется автоматически при публикации новых статей</span>
+  </div>
+  <ul id="articles-list">
+{"".join(items)}
+</ul>
+  <div id="pagination" class="pagination" aria-label="Навигация по страницам блога"></div>
+  <p class="blog-back"><a href="../index.html">На главную Somnia AI</a></p>
+</main>
+<script src="../js/blog.js"></script>
+</body>
+</html>
+"""
+
+def update_sitemap():
+    sitemap_path = "sitemap.xml"
+
+    urls = [
+        {"loc": f"{SITE_URL}/", "lastmod": datetime.now().strftime("%Y-%m-%d"), "priority": "1.0"},
+        {"loc": f"{SITE_URL}/blog/blog.html", "lastmod": datetime.now().strftime("%Y-%m-%d"), "priority": "0.9"},
+    ]
+
+    for name in os.listdir(BLOG_FOLDER):
+        if not name.endswith(".html") or name == BLOG_INDEX:
+            continue
+        date_from_filename = extract_date_from_filename(name)
+        lastmod = date_from_filename or datetime.now().strftime("%Y-%m-%d")
+        urls.append({
+            "loc": f"{SITE_URL}/blog/{quote(name)}",
+            "lastmod": lastmod,
+            "priority": "0.8",
+        })
+
+    url_entries = []
+    for url in urls:
+        url_entries.append(
+            "   <url>\n"
+            f"      <loc>{url['loc']}</loc>\n"
+            f"      <lastmod>{url['lastmod']}</lastmod>\n"
+            "      <changefreq>weekly</changefreq>\n"
+            f"      <priority>{url['priority']}</priority>\n"
+            "   </url>\n"
+        )
+
+    sitemap_xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "".join(url_entries)
+        + "</urlset>\n"
+    )
+
+    with open(sitemap_path, "w", encoding="utf-8") as f:
+        f.write(sitemap_xml)
+
+    print("✅ Sitemap обновлён!")
 
 # 🔹 📌 Обновление индекса блога
 def update_blog_index(title, filename):
@@ -266,10 +379,12 @@ def update_blog_index(title, filename):
             # Читаем существующий список статей, исключая лишние теги
             for line in f:
                 if line.strip().startswith("<li>"):
-                    articles.append(line)
-                    match = re.search(r'href="([^"]+)"', line)
+                    match = re.search(r'href="([^"]+)">([^<]+)<', line)
                     if match:
-                        existing_filenames.add(match.group(1))  # Сохраняем уже добавленные ссылки
+                        parsed_filename = match.group(1)
+                        parsed_title = match.group(2)
+                        articles.append({"filename": parsed_filename, "title": parsed_title})
+                        existing_filenames.add(parsed_filename)
 
     # ✅ Проверяем, есть ли уже такая статья в списке
     if filename in existing_filenames:
@@ -282,16 +397,14 @@ def update_blog_index(title, filename):
         return  # Не добавляем русскую ссылку
 
     # Создаём новую запись для списка
-    new_entry = f'<li><a href="{filename}">{title}</a></li>\n'
-    articles.insert(0, new_entry)  # Добавляем новую статью в начало
+    articles.insert(0, {"filename": filename, "title": title})  # Добавляем новую статью в начало
+
+    # Сортируем по дате в имени файла по убыванию
+    articles.sort(key=lambda article: article["filename"], reverse=True)
 
     # Перезаписываем индексный файл
     with open(index_path, "w", encoding="utf-8") as f:
-        f.write("<html>\n<head>\n<title>Блог Somnia AI</title>\n</head>\n<body>\n")
-        f.write('<link rel="stylesheet" href="../css/blog.css">\n')  # ✅ Добавляем стили
-        f.write("<h1>📚 Блог Somnia AI</h1>\n<ul>\n")
-        f.writelines(articles)  # Уникальные записи
-        f.write("</ul>\n</body>\n</html>\n")
+        f.write(build_blog_index_html(articles))
 
     print("✅ Блог-индекс обновлён!")
 

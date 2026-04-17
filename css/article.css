@@ -1,116 +1,129 @@
-/* Сброс стилей */
+:root {
+  --ink: #09081a;
+  --ink-soft: #12102a;
+  --paper: #f2ece0;
+  --paper-soft: #d8cfbd;
+  --paper-muted: #8a7f6b;
+  --violet: #7c6ff5;
+  --violet-soft: #a99dff;
+  --line: rgba(242, 236, 224, 0.16);
+  --line-strong: rgba(169, 157, 255, 0.4);
+  --serif: "Cormorant Garamond", Georgia, serif;
+  --sans: "DM Sans", system-ui, sans-serif;
+}
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-/* Основной фон и базовые стили */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-    font-family: "Georgia", serif; /* Элегантный шрифт */
-    line-height: 1.8; /* Увеличенное межстрочное расстояние */
-    background: #fdfdfd; /* Светлый фон */
-    color: #333;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(1000px 550px at 85% -10%, rgba(124, 111, 245, 0.16), transparent 60%),
+    radial-gradient(800px 450px at 0 20%, rgba(169, 157, 255, 0.12), transparent 65%),
+    var(--ink);
+  color: var(--paper-soft);
+  font-family: var(--sans);
+  line-height: 1.75;
+  padding: 24px 14px 44px;
 }
 
-/* Контейнер статьи */
 .container {
-    width: 100%;
-    max-width: 700px; /* Ограничиваем ширину */
-    background: #fff; /* Белый фон */
-    padding: 25px;
-    border-radius: 8px; /* Мягкие углы */
-    text-align: left;
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: clamp(18px, 4vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(18, 16, 42, 0.94), rgba(18, 16, 42, 0.78));
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.32);
 }
 
-/* Заголовок статьи */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--serif);
+  color: var(--paper);
+  line-height: 1.2;
+  margin-top: 1.3em;
+  margin-bottom: 0.5em;
+}
+
 h1 {
-    font-size: 28px; /* Читаемый размер */
-    font-weight: bold;
-    color: #222;
-    margin-bottom: 20px;
-    text-align: center;
+  margin-top: 0;
+  font-size: clamp(34px, 6vw, 52px);
+  font-weight: 500;
 }
 
-/* Подзаголовки */
 h2 {
-    font-size: 20px;
-    font-weight: bold;
-    color: #333;
-    margin-top: 20px; /* Умеренный отступ сверху */
-    margin-bottom: 8px; /* Подзаголовок ближе к тексту */
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 500;
 }
 
-/* Основной текст */
 p {
-    font-size: 18px;
-    line-height: 1.6;
-    color: #555;
-    margin-bottom: 15px;
-    text-align: justify; /* Выравнивание текста по ширине */
+  font-size: clamp(18px, 2.8vw, 22px);
+  margin: 0 0 1em;
+  text-align: left;
 }
 
-/* Управление отступами для <br> */
-br {
-    display: block; /* Делает <br> блочным элементом */
-    margin-bottom: 10px; /* Настраивает отступ снизу */
+strong {
+  color: var(--paper);
 }
 
-/* Разделительная линия */
+em {
+  color: #cbbfff;
+}
+
 hr {
-    border: none;
-    height: 1px;
-    background: #ddd;
-    margin: 15px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 28px 0;
 }
 
-/* Кнопка "Вернуться к блогу" */
+.somnia-links p {
+  font-size: 15px;
+  color: var(--paper-soft);
+  margin-bottom: 10px;
+}
+
 a {
-    display: block; /* Превращаем кнопку в блочный элемент для центрирования */
-    text-align: center;
-    background: linear-gradient(90deg, #7443FF, #A062FF);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 16px;
-    margin: 20px auto; /* Центрируем кнопку */
-    transition: background 0.3s;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  color: var(--violet-soft);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 a:hover {
-    background: linear-gradient(90deg, #5a34cc, #8249e0);
+  color: var(--paper);
 }
 
+.container > a:last-child {
+  display: inline-block;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 10px 18px;
+  text-decoration: none;
+  color: var(--paper);
+  background: rgba(124, 111, 245, 0.18);
+}
 
-/* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
-    body {
-        padding: 10px; /* Уменьшаем отступы */
-    }
+.container > a:last-child:hover {
+  background: rgba(124, 111, 245, 0.3);
+}
 
-    .container {
-        padding: 15px; /* Уменьшаем отступы внутри */
-    }
+@media (max-width: 640px) {
+  body {
+    padding: 16px 10px 30px;
+  }
 
-    h1 {
-        font-size: 24px; /* Уменьшаем заголовок */
-    }
-
-    h2 {
-        font-size: 18px; /* Подзаголовок меньше */
-        margin-bottom: 6px; /* Ещё ближе к тексту */
-    }
-
-    p {
-        font-size: 16px; /* Меньший текст для мобильных */
-    }
-
-    br {
-        margin-bottom: 8px; /* Меньше отступов на мобильных */
-    }
+  .container {
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
 }
