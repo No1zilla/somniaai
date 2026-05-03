@@ -280,9 +280,11 @@ def extract_date_from_filename(filename):
     return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
 
 def build_blog_index_html(articles):
-    items = []
-    for article in articles:
-        items.append(f'<li><a href="{article["filename"]}">{article["title"]}</a></li>')
+    items = [
+        f'<li><a href="{html.escape(article["filename"], quote=True)}">{html.escape(article["title"])}</a></li>'
+        for article in articles
+    ]
+    items_html = "\n".join(items)
 
     return f"""<!DOCTYPE html>
 <html lang="ru">
@@ -315,7 +317,7 @@ def build_blog_index_html(articles):
     <span>Обновляется автоматически при публикации новых статей</span>
   </div>
   <ul id="articles-list">
-{"".join(items)}
+{items_html}
 </ul>
   <div id="pagination" class="pagination" aria-label="Навигация по страницам блога"></div>
   <p class="blog-back"><a href="../index.html">На главную Somnia AI</a></p>
@@ -367,46 +369,55 @@ def update_sitemap():
 
     print("✅ Sitemap обновлён!")
 
+def extract_title_from_html(filepath):
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+    except OSError as e:
+        print(f"⚠️ Не удалось прочитать {filepath}: {e}")
+        return None
+
+    m = re.search(r"<title>(.*?)</title>", content, re.DOTALL | re.IGNORECASE)
+    if m:
+        title = html.unescape(m.group(1).strip())
+        title = re.sub(r"\s*\|\s*Somnia AI\s*$", "", title)
+        if title:
+            return title
+
+    m = re.search(r"<h1[^>]*>(.*?)</h1>", content, re.DOTALL | re.IGNORECASE)
+    if m:
+        return html.unescape(re.sub(r"<[^>]+>", "", m.group(1)).strip())
+
+    return None
+
+
 # 🔹 📌 Обновление индекса блога
 def update_blog_index(title, filename):
+    """Перестраивает blog/blog.html по реальному содержимому папки blog/."""
     index_path = os.path.join(BLOG_FOLDER, BLOG_INDEX)
 
     articles = []
-    existing_filenames = set()
+    seen = set()
+    for name in sorted(os.listdir(BLOG_FOLDER)):
+        if not name.endswith(".html") or name == BLOG_INDEX:
+            continue
+        if not extract_date_from_filename(name):
+            continue  # пропускаем файлы без префикса YYYY-MM-DD-
+        if re.search(r"[а-яА-Я]", name):
+            continue  # пропускаем кириллические slug-и
+        if name in seen:
+            continue
+        seen.add(name)
 
-    if os.path.exists(index_path):
-        with open(index_path, "r", encoding="utf-8") as f:
-            # Читаем существующий список статей, исключая лишние теги
-            for line in f:
-                if line.strip().startswith("<li>"):
-                    match = re.search(r'href="([^"]+)">([^<]+)<', line)
-                    if match:
-                        parsed_filename = match.group(1)
-                        parsed_title = match.group(2)
-                        articles.append({"filename": parsed_filename, "title": parsed_title})
-                        existing_filenames.add(parsed_filename)
+        article_title = extract_title_from_html(os.path.join(BLOG_FOLDER, name)) or name
+        articles.append({"filename": name, "title": article_title})
 
-    # ✅ Проверяем, есть ли уже такая статья в списке
-    if filename in existing_filenames:
-        print(f"⚠️ Дубликат! Статья с таким filename уже есть: {filename}")
-        return  # Не добавляем повторно
+    articles.sort(key=lambda a: a["filename"], reverse=True)
 
-    # ✅ Проверяем, содержит ли filename кириллические символы
-    if re.search(r'[а-яА-Я]', filename):
-        print(f"⚠️ Ошибка! Filename содержит кириллицу и не будет добавлен: {filename}")
-        return  # Не добавляем русскую ссылку
-
-    # Создаём новую запись для списка
-    articles.insert(0, {"filename": filename, "title": title})  # Добавляем новую статью в начало
-
-    # Сортируем по дате в имени файла по убыванию
-    articles.sort(key=lambda article: article["filename"], reverse=True)
-
-    # Перезаписываем индексный файл
     with open(index_path, "w", encoding="utf-8") as f:
         f.write(build_blog_index_html(articles))
 
-    print("✅ Блог-индекс обновлён!")
+    print(f"✅ Блог-индекс перестроен: {len(articles)} статей")
 
 # Генерация рандомной длины поста
 def get_random_length():
