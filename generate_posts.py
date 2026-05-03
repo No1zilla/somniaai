@@ -1,4 +1,5 @@
 import os
+import json
 import random
 import pandas as pd
 from datetime import datetime
@@ -206,69 +207,130 @@ def generate_slug(title):
     slug = re.sub(r'-+', '-', slug).strip('-')  # Убираем двойные дефисы
     return slug
 
+def make_meta_description(raw_text, max_len=160):
+    """Делаем meta description из первых max_len символов чистого текста."""
+    text = re.sub(r"```.*?```", " ", raw_text, flags=re.DOTALL)  # код-блоки
+    text = re.sub(r"<[^>]+>", " ", text)  # HTML-теги
+    text = re.sub(r"[#*_`>]+", " ", text)  # markdown
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) <= max_len:
+        return text
+    cut = text[: max_len + 1]
+    if " " in cut:
+        cut = cut.rsplit(" ", 1)[0]
+    return cut.rstrip(" ,.;:—–-") + "…"
+
+
 # 🔹 📌 Функция сохранения статьи
 def save_blog_post(title, content, all_keywords):
-    content = markdown_to_html(content)  # Преобразование Markdown в HTML
-    
-    slug = generate_slug(title)  # Генерируем slug для URL
-    filename = f"{datetime.now().date()}-{slug}.html"  # Создаём имя файла
-    filepath = os.path.join(BLOG_FOLDER, filename)  # Полный путь
-    
-    keywords_str = ", ".join(all_keywords)  # Преобразуем ключевые слова в строку
+    raw_content = content
+    content_html = markdown_to_html(content)
+
+    slug = generate_slug(title)
+    filename = f"{datetime.now().date()}-{slug}.html"
+    filepath = os.path.join(BLOG_FOLDER, filename)
+
+    description = make_meta_description(raw_content)
+    keywords_str = ", ".join(all_keywords)
+    page_url = f"{SITE_URL}/blog/{quote(filename)}"
+    publish_date = datetime.now().strftime("%Y-%m-%d")
+    iso_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+
     escaped_title = html.escape(title)
+    escaped_description = html.escape(description)
     escaped_keywords = html.escape(keywords_str)
-    
-    html_template = f"""
-        <!DOCTYPE html>
-        <html lang="ru">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>{escaped_title} | Somnia AI</title>
-            <meta name="description" content="{escaped_title}">
-            <meta name="keywords" content="{escaped_keywords}">
-            <meta name="robots" content="index,follow,max-image-preview:large">
-            
-            <!-- Canonical URL -->
-            <link rel="canonical" href="{SITE_URL}/blog/{quote(filename)}">     
-            
-            <!-- Стили -->
-            <link rel="stylesheet" href="../css/article.css">       
-        </head>
-        <body>
-            <div class="container">
-                <h1>{escaped_title}</h1>
-                {content}
-    
-                <hr>
-                
-                <!-- 🔥 Блок ссылок на все сервисы Somnia AI -->
-                <div class="somnia-links">
-                    <p>🔮 Расшифруйте ваши сны с помощью Нейросети
-                        <a href="https://t.me/SomniaAI_bot" target="_blank">Перейти в Telegram </a>
-                    </p>
-    
-                    <p>📢 Подписывайтесь на наш канал в tg → 
-                        <a href="https://t.me/somnia_ai" target="_blank">@somnia_ai</a>
-                    </p>
-    
-                    <p>📲 Приложение Somnia AI в RuStore → 
-                        <a href="https://www.rustore.ru/catalog/app/com.somniaai.app" target="_blank">Скачать</a>
-                    </p>
-                </div>
-    
-                <hr>
-    
-                <a href="blog.html">🔙 Вернуться к блогу</a>
-            </div>    
-        </body>
-        </html>
-    """
+
+    json_ld = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": title,
+        "description": description,
+        "datePublished": iso_date,
+        "dateModified": iso_date,
+        "author": {"@type": "Organization", "name": "Somnia AI"},
+        "publisher": {
+            "@type": "Organization",
+            "name": "Somnia AI",
+            "logo": {"@type": "ImageObject", "url": f"{SITE_URL}/favicon.ico"},
+        },
+        "mainEntityOfPage": {"@type": "WebPage", "@id": page_url},
+        "keywords": keywords_str,
+        "inLanguage": "ru",
+    }
+    json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
+
+    html_template = f"""<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{escaped_title} | Somnia AI</title>
+<meta name="description" content="{escaped_description}">
+<meta name="keywords" content="{escaped_keywords}">
+<meta name="author" content="Somnia AI">
+<meta name="robots" content="index,follow,max-image-preview:large">
+
+<link rel="canonical" href="{page_url}">
+
+<!-- Open Graph -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="{escaped_title}">
+<meta property="og:description" content="{escaped_description}">
+<meta property="og:url" content="{page_url}">
+<meta property="og:site_name" content="Somnia AI">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:image" content="{SITE_URL}/night-landscape.webp">
+<meta property="article:published_time" content="{iso_date}">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{escaped_title}">
+<meta name="twitter:description" content="{escaped_description}">
+<meta name="twitter:image" content="{SITE_URL}/night-landscape.webp">
+
+<link rel="stylesheet" href="../css/article.css">
+
+<script type="application/ld+json">
+{json_ld_str}
+</script>
+</head>
+<body>
+<div class="container">
+<article>
+<h1>{escaped_title}</h1>
+<p class="article-meta"><time datetime="{publish_date}">{publish_date}</time> · Somnia AI</p>
+{content_html}
+</article>
+
+<hr>
+
+<!-- 🔥 Блок ссылок на все сервисы Somnia AI -->
+<div class="somnia-links">
+<p>🔮 Расшифруйте ваши сны с помощью Нейросети
+<a href="https://t.me/SomniaAI_bot" target="_blank" rel="noopener">Перейти в Telegram</a>
+</p>
+
+<p>📢 Подписывайтесь на наш канал в tg →
+<a href="https://t.me/somnia_ai" target="_blank" rel="noopener">@somnia_ai</a>
+</p>
+
+<p>📲 Приложение Somnia AI в RuStore →
+<a href="https://www.rustore.ru/catalog/app/com.somniaai.app" target="_blank" rel="noopener">Скачать</a>
+</p>
+</div>
+
+<hr>
+
+<a href="blog.html">🔙 Вернуться к блогу</a>
+</div>
+</body>
+</html>
+"""
 
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(html_template)
 
-    update_blog_index(title, filename)  # ✅ Теперь передаём filename (slug) в update_blog_index()
+    update_blog_index(title, filename)
     update_sitemap()
 
     print(f"✅ Статья сохранена: {filepath}")
@@ -281,7 +343,7 @@ def extract_date_from_filename(filename):
 
 def build_blog_index_html(articles):
     items = [
-        f'<li><a href="{html.escape(article["filename"], quote=True)}">{html.escape(article["title"])}</a></li>'
+        f'<li><a href="{html.escape(quote(article["filename"]), quote=True)}">{html.escape(article["title"])}</a></li>'
         for article in articles
     ]
     items_html = "\n".join(items)
@@ -403,8 +465,6 @@ def update_blog_index(title, filename):
             continue
         if not extract_date_from_filename(name):
             continue  # пропускаем файлы без префикса YYYY-MM-DD-
-        if re.search(r"[а-яА-Я]", name):
-            continue  # пропускаем кириллические slug-и
         if name in seen:
             continue
         seen.add(name)
