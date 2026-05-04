@@ -207,6 +207,84 @@ def generate_slug(title):
     slug = re.sub(r'-+', '-', slug).strip('-')  # Убираем двойные дефисы
     return slug
 
+def _parse_keywords_str(s):
+    if not s:
+        return set()
+    return {p.strip().lower() for p in re.split(r"[,;|]", s) if p.strip()}
+
+
+def _abs_date_diff(a, b):
+    from datetime import date as _date
+    try:
+        return abs((_date.fromisoformat(a) - _date.fromisoformat(b)).days)
+    except Exception:
+        return 10**9
+
+
+def find_related_articles(target_filename, target_title, target_keywords, n=5):
+    """Сканируем blog/, возвращаем n ближайших статей для блока «Похожие»."""
+    target_date = extract_date_from_filename(target_filename) or ""
+    target_kw = _parse_keywords_str(target_keywords) if isinstance(target_keywords, str) else set(
+        k.lower() for k in (target_keywords or [])
+    )
+
+    candidates = []
+    for name in os.listdir(BLOG_FOLDER):
+        if not name.endswith(".html") or name == BLOG_INDEX or name == target_filename:
+            continue
+        date = extract_date_from_filename(name)
+        if not date:
+            continue
+        try:
+            with open(os.path.join(BLOG_FOLDER, name), "r", encoding="utf-8") as f:
+                content = f.read()
+        except OSError:
+            continue
+        title = extract_title_from_html(os.path.join(BLOG_FOLDER, name)) or name
+        m = re.search(
+            r'<meta\s+name=["\']keywords["\']\s+content=["\']([^"\']*)["\']',
+            content,
+            re.IGNORECASE,
+        )
+        kw = _parse_keywords_str(m.group(1) if m else "")
+        candidates.append({"filename": name, "title": title, "keywords": kw, "date": date})
+
+    if target_kw:
+        scored = []
+        for a in candidates:
+            overlap = len(target_kw & a["keywords"])
+            if overlap > 0:
+                scored.append((overlap, a))
+        scored.sort(key=lambda x: (-x[0], _abs_date_diff(x[1]["date"], target_date)))
+        related = [a for _, a in scored[:n]]
+    else:
+        related = []
+
+    if len(related) < n:
+        seen = {a["filename"] for a in related}
+        fallback = sorted(
+            [a for a in candidates if a["filename"] not in seen],
+            key=lambda a: _abs_date_diff(a["date"], target_date),
+        )
+        related.extend(fallback[: n - len(related)])
+    return related
+
+
+def build_related_block_html(related):
+    if not related:
+        return ""
+    items = "\n".join(
+        f'    <li><a href="{quote(a["filename"])}">{html.escape(a["title"])}</a></li>'
+        for a in related
+    )
+    return f"""<aside class="related" aria-label="Похожие статьи">
+  <h2>Похожие статьи</h2>
+  <ul>
+{items}
+  </ul>
+</aside>"""
+
+
 def make_meta_description(raw_text, max_len=160):
     """Делаем meta description из первых max_len символов чистого текста."""
     text = re.sub(r"```.*?```", " ", raw_text, flags=re.DOTALL)  # код-блоки
@@ -258,6 +336,8 @@ def save_blog_post(title, content, all_keywords):
         "inLanguage": "ru",
     }
     json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
+    related = find_related_articles(filename, title, all_keywords, n=5)
+    related_block = build_related_block_html(related)
 
     html_template = f"""<!DOCTYPE html>
 <html lang="ru">
@@ -301,6 +381,8 @@ def save_blog_post(title, content, all_keywords):
 <p class="article-meta"><time datetime="{publish_date}">{publish_date}</time> · Somnia AI</p>
 {content_html}
 </article>
+
+{related_block}
 
 <hr>
 
