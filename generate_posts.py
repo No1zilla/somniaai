@@ -159,6 +159,65 @@ def generate_post(topic, platform, length, style):
         print(f"❌ Ошибка OpenAI ({platform}): {e}")
         return None, []
 
+# 🔹 📌 Генерация поста для блога (JSON: body + seo_title + description + faq)
+def generate_blog_post(topic):
+    try:
+        selected_dream_type = random.choice(DREAM_TYPES)
+        selected_keywords = random.sample(SEO_KEYWORDS, k=2)
+        additional_keywords = generate_seo_keywords(topic)
+        all_keywords = selected_keywords + additional_keywords[:2]
+        print(f"📌 SEO-ключи (blog): {all_keywords}")
+
+        prompt = f"""
+Ты профессиональный юнгианский аналитик и SEO-копирайтер.
+Тема статьи: "{topic}"
+Тип сна для иллюстрации: {selected_dream_type}
+Ключевые слова, которые нужно органично вплести в body:
+{", ".join(all_keywords)}
+
+Сформируй ответ СТРОГО в формате JSON со следующими полями:
+
+{{
+  "seo_title": "SEO-оптимизированный заголовок до 60 символов, по паттерну «К чему снится X: толкование по Юнгу» или «X во сне — значение и смысл». ВАЖНО: должен содержать поисковый интент (что человек гуглит), без «Somnia AI» (мы добавим сами).",
+  "description": "Meta description 140–160 символов: чёткое описание о чём статья + причина прочитать. Без «в этой статье», без «мы расскажем».",
+  "body": "Markdown-текст 4–5 абзацев глубокого лонгрида. Структура: 1) короткий пример сна (~30%), 2) интерпретация по Юнгу с архетипами (~40%), 3) практический инсайт + 1–2 вопроса (~30%). Без заголовков (без #). Эмодзи запрещены. Никаких «каждому знакомо». Конкретные неожиданные детали. Никакого эзотерического пафоса.",
+  "faq": [
+    {{"question": "Точный вопрос, который люди гуглят про эту тему", "answer": "Ёмкий ответ 2–3 предложения, прямой и психологически точный"}},
+    {{"question": "...", "answer": "..."}},
+    {{"question": "...", "answer": "..."}}
+  ]
+}}
+
+Ответ — ТОЛЬКО валидный JSON, без обёрток и комментариев.
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Ты юнгианский аналитик и SEO-копирайтер. Отвечаешь строго JSON."},
+                {"role": "user", "content": prompt},
+            ],
+            response_format={"type": "json_object"},
+            max_tokens=1800,
+            temperature=0.7,
+        )
+        data = json.loads(response.choices[0].message.content)
+        return {
+            "seo_title": (data.get("seo_title") or topic).strip(),
+            "description": (data.get("description") or "").strip(),
+            "body": (data.get("body") or "").strip(),
+            "faq": [
+                {"question": (q.get("question") or "").strip(), "answer": (q.get("answer") or "").strip()}
+                for q in (data.get("faq") or [])
+                if q.get("question") and q.get("answer")
+            ][:5],
+            "keywords": all_keywords,
+        }
+    except Exception as e:
+        print(f"❌ Ошибка OpenAI (blog JSON): {e}")
+        return None
+
+
 # 🔹 📌 Отправка в Telegram
 def post_to_telegram(message, disable_web_page_preview=False):
     try:
@@ -300,7 +359,7 @@ def make_meta_description(raw_text, max_len=160):
 
 
 # 🔹 📌 Функция сохранения статьи
-def save_blog_post(title, content, all_keywords):
+def save_blog_post(title, content, all_keywords, seo_title=None, description=None, faq=None):
     raw_content = content
     content_html = markdown_to_html(content)
 
@@ -308,20 +367,24 @@ def save_blog_post(title, content, all_keywords):
     filename = f"{datetime.now().date()}-{slug}.html"
     filepath = os.path.join(BLOG_FOLDER, filename)
 
-    description = make_meta_description(raw_content)
+    if not description:
+        description = make_meta_description(raw_content)
+    page_title = (seo_title or title).strip()
     keywords_str = ", ".join(all_keywords)
     page_url = f"{SITE_URL}/blog/{quote(filename)}"
     publish_date = datetime.now().strftime("%Y-%m-%d")
     iso_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
-    escaped_title = html.escape(title)
+    escaped_h1 = html.escape(title)
+    escaped_page_title = html.escape(page_title)
     escaped_description = html.escape(description)
     escaped_keywords = html.escape(keywords_str)
 
-    json_ld = {
+    article_ld = {
         "@context": "https://schema.org",
         "@type": "Article",
-        "headline": title,
+        "headline": page_title,
+        "alternativeHeadline": title,
         "description": description,
         "datePublished": iso_date,
         "dateModified": iso_date,
@@ -334,8 +397,54 @@ def save_blog_post(title, content, all_keywords):
         "mainEntityOfPage": {"@type": "WebPage", "@id": page_url},
         "keywords": keywords_str,
         "inLanguage": "ru",
+        "image": f"{SITE_URL}/night-landscape.webp",
     }
-    json_ld_str = json.dumps(json_ld, ensure_ascii=False, indent=2)
+    breadcrumb_ld = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Главная", "item": f"{SITE_URL}/"},
+            {"@type": "ListItem", "position": 2, "name": "Блог", "item": f"{SITE_URL}/blog/blog.html"},
+            {"@type": "ListItem", "position": 3, "name": title, "item": page_url},
+        ],
+    }
+    schemas = [article_ld, breadcrumb_ld]
+
+    faq_block = ""
+    if faq:
+        faq_ld = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": q["question"],
+                    "acceptedAnswer": {"@type": "Answer", "text": q["answer"]},
+                }
+                for q in faq
+            ],
+        }
+        schemas.append(faq_ld)
+        faq_items_html = "\n".join(
+            f"  <details>\n    <summary>{html.escape(q['question'])}</summary>\n    <p>{html.escape(q['answer'])}</p>\n  </details>"
+            for q in faq
+        )
+        faq_block = f"""<section class="faq" aria-label="Частые вопросы">
+  <h2>Частые вопросы</h2>
+{faq_items_html}
+</section>"""
+
+    json_ld_str = "\n".join(
+        f'<script type="application/ld+json">\n{json.dumps(s, ensure_ascii=False, indent=2)}\n</script>'
+        for s in schemas
+    )
+
+    breadcrumbs_html = f"""<nav class="breadcrumbs" aria-label="Хлебные крошки">
+  <a href="../index.html">Главная</a> ›
+  <a href="blog.html">Блог</a> ›
+  <span>{escaped_h1}</span>
+</nav>"""
+
     related = find_related_articles(filename, title, all_keywords, n=5)
     related_block = build_related_block_html(related)
 
@@ -344,7 +453,7 @@ def save_blog_post(title, content, all_keywords):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{escaped_title} | Somnia AI</title>
+<title>{escaped_page_title} | Somnia AI</title>
 <meta name="description" content="{escaped_description}">
 <meta name="keywords" content="{escaped_keywords}">
 <meta name="author" content="Somnia AI">
@@ -354,7 +463,7 @@ def save_blog_post(title, content, all_keywords):
 
 <!-- Open Graph -->
 <meta property="og:type" content="article">
-<meta property="og:title" content="{escaped_title}">
+<meta property="og:title" content="{escaped_page_title}">
 <meta property="og:description" content="{escaped_description}">
 <meta property="og:url" content="{page_url}">
 <meta property="og:site_name" content="Somnia AI">
@@ -364,23 +473,24 @@ def save_blog_post(title, content, all_keywords):
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{escaped_title}">
+<meta name="twitter:title" content="{escaped_page_title}">
 <meta name="twitter:description" content="{escaped_description}">
 <meta name="twitter:image" content="{SITE_URL}/night-landscape.webp">
 
 <link rel="stylesheet" href="../css/article.css">
 
-<script type="application/ld+json">
 {json_ld_str}
-</script>
 </head>
 <body>
 <div class="container">
+{breadcrumbs_html}
 <article>
-<h1>{escaped_title}</h1>
+<h1>{escaped_h1}</h1>
 <p class="article-meta"><time datetime="{publish_date}">{publish_date}</time> · Somnia AI</p>
 {content_html}
 </article>
+
+{faq_block}
 
 {related_block}
 
@@ -580,7 +690,7 @@ if topic:
     # Генерация постов
     tg_post_text, _ = generate_post(topic, "telegram", tg_length, "дружеский")
     vk_post_text, vk_keywords = generate_post(topic, "vk", vk_length, "аналитический")
-    blog_post_text, blog_keywords = generate_post(topic, "blog", "long", "экспертный")
+    blog_data = generate_blog_post(topic)
 
     # Рандомная реклама
     ad = random.choice(ADVERTISEMENTS)
@@ -602,8 +712,15 @@ if topic:
         post_to_vk(f"{clean_vk_text}\n\n{ad}", hashtags)  # Отправляем очищенный текст с рекламой и хэштегами
         
     # 🌍 Публикация в блог
-    if blog_post_text:
-        save_blog_post(topic, blog_post_text, blog_keywords)
+    if blog_data and blog_data.get("body"):
+        save_blog_post(
+            title=topic,
+            content=blog_data["body"],
+            all_keywords=blog_data["keywords"],
+            seo_title=blog_data.get("seo_title"),
+            description=blog_data.get("description"),
+            faq=blog_data.get("faq"),
+        )
 
 else:
     print("❌ Сегодня нет темы для публикации.")
