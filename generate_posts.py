@@ -533,11 +533,40 @@ def extract_date_from_filename(filename):
         return None
     return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
 
+def _normalize_for_compare(s):
+    """Нижний регистр без пунктуации/пробелов — для сравнения title vs subtitle."""
+    return re.sub(r"\W+", "", (s or "").lower())
+
+
+_SEO_PATTERNS = re.compile(
+    r"к\s*чему\s+снится|сн(?:ы|ятся|ится|илось|илась|ился|ились|ам|ах|у)\b|"
+    r"сон\s+о|сны\s+о|что\s+значит|значени[еяй]|толковани[еяй]",
+    re.IGNORECASE,
+)
+
+
+def _is_seo_optimized(s):
+    return bool(_SEO_PATTERNS.search(s or ""))
+
+
 def build_blog_index_html(articles):
-    items = [
-        f'<li><a href="{html.escape(quote(article["filename"]), quote=True)}">{html.escape(article["title"])}</a></li>'
-        for article in articles
-    ]
+    items = []
+    for article in articles:
+        href = html.escape(quote(article["filename"]), quote=True)
+        title = html.escape(article["title"])
+        attrs = ""
+        seo_subtitle = (article.get("seo_subtitle") or "").strip()
+        if (
+            seo_subtitle
+            and _normalize_for_compare(seo_subtitle) != _normalize_for_compare(article["title"])
+            and _is_seo_optimized(seo_subtitle)
+            and not _is_seo_optimized(article["title"])
+        ):
+            attrs += f' data-seo-subtitle="{html.escape(seo_subtitle, quote=True)}"'
+        description = (article.get("description") or "").strip()
+        if description:
+            attrs += f' data-description="{html.escape(description, quote=True)}"'
+        items.append(f'<li{attrs}><a href="{href}">{title}</a></li>')
     items_html = "\n".join(items)
 
     return f"""<!DOCTYPE html>
@@ -624,25 +653,41 @@ def update_sitemap():
     print("✅ Sitemap обновлён!")
 
 def extract_title_from_html(filepath):
+    """Возвращает заголовок для индекса. h1 (художественный) приоритет, fallback — <title>."""
+    meta = read_article_meta(filepath)
+    return meta.get("h1") or meta.get("seo_title") or None
+
+
+def read_article_meta(filepath):
+    """Возвращает {h1, seo_title, description} из HTML-статьи."""
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
     except OSError as e:
         print(f"⚠️ Не удалось прочитать {filepath}: {e}")
-        return None
+        return {}
 
+    seo_title = ""
     m = re.search(r"<title>(.*?)</title>", content, re.DOTALL | re.IGNORECASE)
     if m:
-        title = html.unescape(m.group(1).strip())
-        title = re.sub(r"\s*\|\s*Somnia AI\s*$", "", title)
-        if title:
-            return title
+        t = html.unescape(m.group(1).strip())
+        seo_title = re.sub(r"\s*\|\s*Somnia AI\s*$", "", t).strip()
 
+    h1 = ""
     m = re.search(r"<h1[^>]*>(.*?)</h1>", content, re.DOTALL | re.IGNORECASE)
     if m:
-        return html.unescape(re.sub(r"<[^>]+>", "", m.group(1)).strip())
+        h1 = html.unescape(re.sub(r"<[^>]+>", "", m.group(1)).strip())
 
-    return None
+    description = ""
+    m = re.search(
+        r'<meta\s+name=["\']description["\']\s+content=["\']([^"\']*)["\']',
+        content,
+        re.IGNORECASE,
+    )
+    if m:
+        description = html.unescape(m.group(1).strip())
+
+    return {"h1": h1, "seo_title": seo_title, "description": description}
 
 
 # 🔹 📌 Обновление индекса блога
@@ -661,8 +706,14 @@ def update_blog_index(title, filename):
             continue
         seen.add(name)
 
-        article_title = extract_title_from_html(os.path.join(BLOG_FOLDER, name)) or name
-        articles.append({"filename": name, "title": article_title})
+        meta = read_article_meta(os.path.join(BLOG_FOLDER, name))
+        article_title = meta.get("h1") or meta.get("seo_title") or name
+        articles.append({
+            "filename": name,
+            "title": article_title,
+            "seo_subtitle": meta.get("seo_title", ""),
+            "description": meta.get("description", ""),
+        })
 
     articles.sort(key=lambda a: a["filename"], reverse=True)
 

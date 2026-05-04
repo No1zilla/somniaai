@@ -24,10 +24,16 @@
     "дек",
   ];
 
-  const rawItems = Array.from(listEl.querySelectorAll("li a")).map((anchor) => {
+  const rawItems = Array.from(listEl.querySelectorAll("li")).map((li) => {
+    const anchor = li.querySelector("a");
+    if (!anchor) return null;
     const href = anchor.getAttribute("href") || "";
     const title = (anchor.textContent || "").trim();
-    const match = href.match(/^(\d{4})-(\d{2})-(\d{2})-/);
+    const description = (li.getAttribute("data-description") || "").trim();
+    const seoSubtitle = (li.getAttribute("data-seo-subtitle") || "").trim();
+    let decoded = href;
+    try { decoded = decodeURIComponent(href); } catch (_) { /* keep raw */ }
+    const match = decoded.match(/^(\d{4})-(\d{2})-(\d{2})-/);
 
     let year = "без даты";
     let dateLabel = "Без даты";
@@ -39,15 +45,17 @@
       dateLabel = `${day} ${monthNames[monthIndex] || ""} ${year}`.trim();
     }
 
+    const fallbackExcerpt = `${title.slice(0, 120)}${title.length > 120 ? "…" : ""}`;
     return {
       href,
       title,
-      titleLc: title.toLowerCase(),
+      titleLc: (title + " " + description + " " + seoSubtitle).toLowerCase(),
       year,
       dateLabel,
-      excerpt: `${title.slice(0, 120)}${title.length > 120 ? "..." : ""}`,
+      excerpt: description || fallbackExcerpt,
+      seoSubtitle,
     };
-  });
+  }).filter(Boolean);
 
   const years = Array.from(
     new Set(rawItems.map((item) => item.year).filter((year) => /^\d{4}$/.test(year)))
@@ -112,13 +120,21 @@
       title.className = "article-title";
       title.textContent = item.title;
 
+      a.appendChild(date);
+      a.appendChild(title);
+
+      if (item.seoSubtitle) {
+        const sub = document.createElement("p");
+        sub.className = "article-seo-subtitle";
+        sub.textContent = item.seoSubtitle;
+        a.appendChild(sub);
+      }
+
       const excerpt = document.createElement("p");
       excerpt.className = "article-excerpt";
       excerpt.textContent = item.excerpt;
-
-      a.appendChild(date);
-      a.appendChild(title);
       a.appendChild(excerpt);
+
       li.appendChild(a);
       listEl.appendChild(li);
     }
