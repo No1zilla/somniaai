@@ -2,7 +2,7 @@ name: Auto Post Content
 
 on:
   schedule:
-    - cron: "0 18 * * *"  # Запуск каждый день в 21:00 UTC (14:00 по Москве)
+    - cron: "0 18 * * *"  # Запуск каждый день в 18:00 UTC (21:00 по Москве)
   workflow_dispatch:  # Возможность запустить вручную
 
 jobs:
@@ -36,6 +36,8 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add blog/*.html blog.html
+          git add blog/*.html blog.html sitemap.xml
+          # В дни без темы коммитить нечего — не роняем job
+          git diff --cached --quiet && { echo "Нет изменений"; exit 0; }
           git commit -m "📝 Автоматически добавлены новые статьи в блог"
-          git push          
+          git push
