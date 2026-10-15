@@ -43,7 +43,6 @@ ADVERTISEMENTS = [
     "🔮 Расшифруйте ваши сны с помощью Нейросети → Somnia AI https://t.me/SomniaAI_bot",
     "📢 Подписывайтесь на наш канал Психология сновидений → telegram somnia_ai https://t.me/somnia_ai",
     "🌐 Интересные статьи о снах читайте в блоге на нашем сайте → somnia-ai.com https://somnia-ai.com/",
-    "📲 Спросите Нейросеть Somnia AI про ваш сон в приложении → RuStore https://www.rustore.ru/catalog/app/com.somniaai.app"
 ]
 
 # 🔹 Призыв в конце поста в Telegram-канале
@@ -585,9 +584,6 @@ def save_blog_post(title, content, all_keywords, seo_title=None, description=Non
 <a href="https://t.me/somnia_ai" target="_blank" rel="noopener">@somnia_ai</a>
 </p>
 
-<p>📲 Приложение Somnia AI в RuStore →
-<a href="https://www.rustore.ru/catalog/app/com.somniaai.app" target="_blank" rel="noopener">Скачать</a>
-</p>
 </div>
 
 <hr>
