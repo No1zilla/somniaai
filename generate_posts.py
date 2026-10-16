@@ -624,6 +624,7 @@ def update_sitemap():
     urls = [
         {"loc": f"{SITE_URL}/", "lastmod": datetime.now().strftime("%Y-%m-%d"), "priority": "1.0"},
         {"loc": f"{SITE_URL}/blog/blog.html", "lastmod": datetime.now().strftime("%Y-%m-%d"), "priority": "0.9"},
+        {"loc": f"{SITE_URL}/test-arhetipy-yunga.html", "lastmod": "2026-10-16", "priority": "0.9"},
     ]
 
     for name in os.listdir(BLOG_FOLDER):
