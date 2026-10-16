@@ -20,6 +20,12 @@ VK_GROUP_ID = "-229159722"  # ID группы VK (со знаком "-")
 
 # 🔹 Пути к файлам
 CSV_FILE = "content_plan.csv"
+# Блог — отдельный план раз в неделю: практические вопросы о снах.
+# Посты-символы «К чему снится…» идут только в Telegram и ВК: в блоге они конкурировали с большими сонниками
+# и попадали в «малоценные» у Яндекса и «просканировано, не проиндексировано» у Google.
+BLOG_PLAN_FILE = "blog_plan.csv"
+# Статья раз в неделю — можно позволить модель сильнее: mini писала втрое короче заданного
+BLOG_MODEL = "gpt-4o"
 BLOG_FOLDER = "blog"
 BLOG_INDEX = "blog.html"
 SITE_URL = "https://somnia-ai.com"
@@ -31,16 +37,9 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 vk_session = vk_api.VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
 
-# 🔹 SEO-ключевые слова
-SEO_KEYWORDS = [
-    "сонник", "толкование снов", "к чему снится", "приснилось что", "осознанные сновидения",
-    "сон", "значение снов", "во сне", "видеть во сне", "сонник онлайн", "Somnia AI",
-    "сонник нейросеть", "кошмар", "сонник толкование"
-]
-
 # 🔹 Рекламные блоки
 ADVERTISEMENTS = [
-    "🔮 Расшифруйте ваши сны с помощью Нейросети → Somnia AI https://t.me/SomniaAI_bot",
+    "🔮 Расшифруйте ваши сны с помощью Нейросети → Somnia AI https://t.me/SomniaAI_bot?start=vk",
     "📢 Подписывайтесь на наш канал Психология сновидений → telegram somnia_ai https://t.me/somnia_ai",
     "🌐 Интересные статьи о снах читайте в блоге на нашем сайте → somnia-ai.com https://somnia-ai.com/",
 ]
@@ -48,24 +47,10 @@ ADVERTISEMENTS = [
 # 🔹 Призыв в конце поста в Telegram-канале
 TG_CHANNEL_CTA = "🔮 Приснилось похожее? Расскажите сон боту Somnia AI — он разберёт символы за минуту → https://t.me/SomniaAI_bot?start=tg_channel"
 
-# 🔹 Типы сна (для разнообразия контента)
-DREAM_TYPES = [
-    "тревожный городской сон",
-    "сон с элементами абсурда",
-    "минималистичный сон с одним символом",
-    "сон с диалогом",
-    "повторяющийся сон",
-    "сон-лабиринт",
-    "сон о встрече с незнакомцем",
-    "сон о потере или поиске",
-    "сон в замкнутом пространстве",
-    "сон с искажением времени"
-]
-
 # 🔹 📌 Функция получения темы
-def get_today_topic():
+def get_today_topic(csv_file=CSV_FILE):
     try:
-        df = pd.read_csv(CSV_FILE)
+        df = pd.read_csv(csv_file)
         df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d").dt.date
         today = datetime.now().date()
         topic_row = df[df["date"] == today]
@@ -157,97 +142,45 @@ def generate_post(topic, platform, length, style):
         print(f"❌ Ошибка OpenAI ({platform}): {e}")
         return None, []
 
-# Высокочастотные поисковые «ядра» в нише сонников (по знанию ниши, не по live-Wordstat).
-# Используются как hint для OpenAI, чтобы seo_title цеплял реальный спрос.
-HIGH_VOLUME_DREAM_SYMBOLS = [
-    # Тело/состояния
-    "зубы", "выпадают зубы", "кровь", "беременность", "роды", "болезнь", "смерть",
-    # Природа
-    "вода", "море", "река", "огонь", "пожар", "снег", "дождь", "лес",
-    # Существа
-    "змея", "паук", "кошка", "собака", "лошадь", "крысы", "мыши", "птица",
-    # Действия
-    "падать", "летать", "бежать", "плыть", "тонуть", "теряться", "опаздывать",
-    # Люди и роли
-    "бывший", "бывшая", "покойник", "умерший", "ребёнок", "младенец",
-    "незнакомец", "мама", "папа", "родители",
-    # Места и предметы
-    "дом", "квартира", "старый дом", "дорога", "машина", "поезд", "лестница",
-    "дверь", "зеркало", "деньги", "обувь", "волосы", "одежда",
-    # Эмоции/ситуации
-    "свадьба", "похороны", "конфликт", "погоня", "ссора",
-]
-
-
-# Простой проверщик: убеждаемся, что seo_title начинается с поискового паттерна.
-_SEO_TITLE_RE = re.compile(
-    r"(?i)^(к\s*чему\s+снится|сон\s+о|сны\s+о|что\s+значит|значени[еяй]|толковани[еяй])",
-)
-
-
-def _seo_title_is_strong(title):
-    if not title:
-        return False
-    if not _SEO_TITLE_RE.search(title):
-        return False
-    if len(title) > 70:
-        return False
-    return True
-
-
-# 🔹 📌 Генерация поста для блога (JSON: body + seo_title + description + faq)
-def generate_blog_post(topic, retry=True):
+# 🔹 📌 Генерация статьи для блога (JSON: body + seo_title + description + faq)
+# Тема — практический вопрос, который люди ищут («Почему снятся кошмары каждую ночь»).
+# Единственная статья, которая приносила клики из Google, была именно такой: «Как задать вопрос и получить ответ во сне».
+def generate_blog_post(topic):
     try:
-        selected_dream_type = random.choice(DREAM_TYPES)
-        selected_keywords = random.sample(SEO_KEYWORDS, k=2)
         additional_keywords = generate_seo_keywords(topic)
-        all_keywords = selected_keywords + additional_keywords[:2]
+        all_keywords = additional_keywords[:4]
         print(f"📌 SEO-ключи (blog): {all_keywords}")
 
-        symbols_hint = ", ".join(HIGH_VOLUME_DREAM_SYMBOLS)
-
         prompt = f"""
-Ты профессиональный юнгианский аналитик и SEO-копирайтер для русскоязычного сонника.
-Темa статьи (художественная, для бренда): "{topic}"
-Тип сна для иллюстрации: {selected_dream_type}
-Дополнительные ключи для тела статьи (вплети органично): {", ".join(all_keywords)}
+Ты психолог и автор полезных статей о снах для сайта Somnia AI (сонник ИИ с юнгианским подходом).
+Тема статьи — вопрос, который люди ищут в поиске: «{topic}».
+Ключевые фразы, которые нужно органично использовать в тексте: {", ".join(all_keywords)}
 
 Сформируй СТРОГО валидный JSON со следующими полями.
 
-# seo_title (КРИТИЧНО для органического трафика)
-ОБЯЗАТЕЛЬНЫЙ паттерн: «К чему снится {{СИМВОЛ}}: толкование сна по Юнгу»
-или «К чему снится {{СИМВОЛ}}: значение сна».
-
-ПРАВИЛА:
-1. Подбери САМЫЙ ШИРОКИЙ символ из списка частотных запросов, который соответствует
-   художественной теме «{topic}» и теме сна:
-   [{symbols_hint}]
-2. Если ничего из списка не подходит — выбери одно слово (существительное в им. падеже),
-   максимально широкое. Не используй уточнения типа «попугай в клетке», «дверь без ручки».
-   Должно быть «попугай» или «птица», «дверь».
-3. Длина seo_title — 35–65 символов (без « | Somnia AI», его добавим автоматически).
-4. Не добавляй название бренда.
+# seo_title
+Заголовок для поиска, 40–70 символов (без « | Somnia AI»). Начинается с сути вопроса,
+по смыслу совпадает с темой. Без кликбейта и без названия бренда.
 
 # description
-Meta description 140–160 символов. Чёткое описание о чём статья + причина прочитать.
-ОБЯЗАТЕЛЬНО содержит тот же символ, что в seo_title.
+Meta description строго 140–160 символов: прямой ответ в одном предложении + что ещё есть в статье.
 Без «в этой статье», «мы расскажем», «давайте рассмотрим».
 
 # body
-Markdown-текст 4–5 абзацев глубокого лонгрида. Структура:
-1) короткий пример сна (~30%) — здесь ОБЯЗАТЕЛЬНО первое предложение содержит
-   тот же символ из seo_title в естественной форме.
-2) интерпретация по Юнгу с архетипами (~40%)
-3) практический инсайт + 1–2 вопроса (~30%)
-Без заголовков. Без эмодзи. Без клише «каждому знакомо», «всем известно».
-Конкретные неожиданные детали. Без эзотерического пафоса.
+Markdown, 900–1200 слов. Структура и объём:
+1) первый абзац — прямой ответ на вопрос, 50–80 слов, без вступлений;
+2) 4 раздела с подзаголовками «## …», каждый 150–250 слов: причины с точки зрения психологии
+   и науки о сне, житейский пример, взгляд Юнга — только где действительно уместен, с пояснением терминов;
+3) раздел «## Что можно сделать» — 5–7 конкретных шагов списком, у каждого шага 1–2 предложения пояснения;
+4) короткий вывод, 40–60 слов.
+Пиши конкретно, с примерами из жизни. Без эзотерики, без предсказаний будущего,
+без медицинских диагнозов (при тяжёлых симптомах — мягко советуй обратиться к врачу).
+Без эмодзи, без клише «каждому знакомо», «всем известно».
 
 # faq
-Ровно 3 объекта. ОБЯЗАТЕЛЬНО первый вопрос — точный поисковый запрос, который
-люди гуглят про этот символ. Например: «К чему снится {{СИМВОЛ}}?»
-Ответы 2–3 предложения, прямые, без воды.
+Ровно 3 объекта: частые уточняющие вопросы по теме и ответы в 2–3 предложения.
 
-ОТВЕТ — ТОЛЬКО валидный JSON, без обёрток, без комментариев, без markdown-разметки.
+ОТВЕТ — ТОЛЬКО валидный JSON, без обёрток и комментариев.
 
 {{
   "seo_title": "...",
@@ -262,17 +195,17 @@ Markdown-текст 4–5 абзацев глубокого лонгрида. С
 """
 
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=BLOG_MODEL,
             messages=[
-                {"role": "system", "content": "Ты юнгианский аналитик и SEO-копирайтер. Отвечаешь строго JSON по правилам."},
+                {"role": "system", "content": "Ты психолог и автор полезных статей о снах. Отвечаешь строго JSON по правилам."},
                 {"role": "user", "content": prompt},
             ],
             response_format={"type": "json_object"},
-            max_tokens=1800,
-            temperature=0.7,
+            max_tokens=4000,
+            temperature=0.6,
         )
         data = json.loads(response.choices[0].message.content)
-        result = {
+        return {
             "seo_title": (data.get("seo_title") or topic).strip(),
             "description": (data.get("description") or "").strip(),
             "body": (data.get("body") or "").strip(),
@@ -283,14 +216,6 @@ Markdown-текст 4–5 абзацев глубокого лонгрида. С
             ][:5],
             "keywords": all_keywords,
         }
-
-        # Валидация: seo_title должен соответствовать SEO-паттерну.
-        if not _seo_title_is_strong(result["seo_title"]):
-            print(f"⚠️ Слабый seo_title: {result['seo_title']!r}")
-            if retry:
-                print("🔁 Повторный запрос с усилением SEO-паттерна…")
-                return generate_blog_post(topic + " (используй паттерн «К чему снится X»)", retry=False)
-        return result
     except Exception as e:
         print(f"❌ Ошибка OpenAI (blog JSON): {e}")
         return None
@@ -448,6 +373,14 @@ def save_blog_post(title, content, all_keywords, seo_title=None, description=Non
     if not description:
         description = make_meta_description(raw_content)
     page_title = (seo_title or title).strip()
+    # Одинаковые <title> у разных статей поисковики считают дублями — делаем заголовок уникальным
+    existing_titles = {
+        read_article_meta(os.path.join(BLOG_FOLDER, n)).get("seo_title", "")
+        for n in os.listdir(BLOG_FOLDER)
+        if n.endswith(".html") and n != BLOG_INDEX
+    }
+    if page_title in existing_titles and page_title != title:
+        page_title = f"{title}: {page_title[0].lower()}{page_title[1:]}"
     keywords_str = ", ".join(all_keywords)
     page_url = f"{SITE_URL}/blog/{quote(filename)}"
     publish_date = datetime.now().strftime("%Y-%m-%d")
@@ -577,7 +510,7 @@ def save_blog_post(title, content, all_keywords, seo_title=None, description=Non
 <!-- 🔥 Блок ссылок на все сервисы Somnia AI -->
 <div class="somnia-links">
 <p>🔮 Расшифруйте ваши сны с помощью Нейросети
-<a href="https://t.me/SomniaAI_bot" target="_blank" rel="noopener">Перейти в Telegram</a>
+<a href="https://t.me/SomniaAI_bot?start=blog" target="_blank" rel="noopener">Перейти в Telegram</a>
 </p>
 
 <p>📢 Подписывайтесь на наш канал в tg →
@@ -805,6 +738,7 @@ def get_random_length():
 
 # 🔹 📌 Запуск постинга
 topic = get_today_topic()
+blog_topic = get_today_topic(BLOG_PLAN_FILE)
 
 if topic:
     print(f"🎯 Тема на сегодня: {topic}")
@@ -816,7 +750,6 @@ if topic:
     # Генерация постов
     tg_post_text, _ = generate_post(topic, "telegram", tg_length, "дружеский")
     vk_post_text, vk_keywords = generate_post(topic, "vk", vk_length, "аналитический")
-    blog_data = generate_blog_post(topic)
 
     # Рандомная реклама
     ad = random.choice(ADVERTISEMENTS)
@@ -837,17 +770,21 @@ if topic:
         clean_vk_text = vk_post_text.replace("#", "").replace("*", "")  # Убираем Markdown-символы
         hashtags = " ".join([f"#{word.replace(' ', '_')}" for word in vk_keywords])  # Генерация хэштегов
         post_to_vk(f"{clean_vk_text}\n\n{ad}", hashtags)  # Отправляем очищенный текст с рекламой и хэштегами
-        
-    # 🌍 Публикация в блог
+else:
+    print("❌ Сегодня нет темы для соцсетей.")
+
+# 🌍 Публикация в блог — по своему плану
+if blog_topic:
+    print(f"📝 Статья в блог: {blog_topic}")
+    blog_data = generate_blog_post(blog_topic)
     if blog_data and blog_data.get("body"):
         save_blog_post(
-            title=topic,
+            title=blog_topic,
             content=blog_data["body"],
             all_keywords=blog_data["keywords"],
             seo_title=blog_data.get("seo_title"),
             description=blog_data.get("description"),
             faq=blog_data.get("faq"),
         )
-
 else:
-    print("❌ Сегодня нет темы для публикации.")
+    print("❌ Сегодня нет статьи для блога.")
